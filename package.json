@@ -1,0 +1,15 @@
+{
+  "name": "sbbfuels-website_old",
+  "version": "1.0.0",
+  "description": "Static website with a backend form submission recorder",
+  "main": "backend/server.js",
+  "scripts": {
+    "start": "node backend/server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.4",
+    "xlsx": "^0.18.5",
+    "nodemailer": "^6.9.3",
+    "dotenv": "^16.4.5"
+  }
+}

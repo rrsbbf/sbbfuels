@@ -1,0 +1,12 @@
+/* Local icon set keeps the site usable when external CDNs are unavailable. */
+.fa-solid { font-style: normal; }
+.fa-envelope::before { content: '\2709'; }
+.fa-phone::before { content: '\260e'; }
+.fa-gears::before { content: '\2699'; }
+.fa-flask-vial::before { content: '\2697'; }
+.fa-people-group::before { content: '\263a'; }
+.fa-leaf::before { content: '\2618'; }
+.fa-flask::before { content: '\2697'; }
+.fa-vial::before { content: '\2697'; }
+.fa-droplet::before { content: '\25c6'; }
+.icon-location { display: inline-block; width: 8px; height: 10px; margin: 0 6px 0 1px; border: 1px solid currentColor; border-radius: 7px 7px 7px 0; transform: rotate(-45deg); }

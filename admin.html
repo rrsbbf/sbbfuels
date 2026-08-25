@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Admin — Enquiry Dashboard</title>
+<style>
+  :root { --accent:#1a7f37; --bg:#0f1115; --card:#171a21; --border:#2a2e38; --text:#e8eaee; --muted:#9aa1ac; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: system-ui, Arial, sans-serif; background:var(--bg); color:var(--text); }
+  header { padding: 20px 28px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; }
+  header h1 { margin:0; font-size: 20px; }
+  #status-dot { display:inline-block; width:10px; height:10px; border-radius:50%; background:#e04b4b; margin-right:8px; }
+  #status-dot.live { background: var(--accent); }
+  main { padding: 24px 28px; max-width: 1000px; margin: 0 auto; }
+  table { width:100%; border-collapse: collapse; margin-top: 10px; }
+  th, td { text-align:left; padding: 10px 12px; border-bottom:1px solid var(--border); font-size:14px; vertical-align: top; }
+  th { color: var(--muted); font-weight:600; text-transform: uppercase; font-size:11px; letter-spacing:.05em; }
+  tr.new-row { animation: flash 2.5s ease-out; }
+  @keyframes flash { 0% { background: rgba(26,127,55,.35); } 100% { background: transparent; } }
+  #empty { color: var(--muted); margin-top: 20px; }
+  #toast-wrap { position: fixed; top: 20px; right: 20px; display:flex; flex-direction:column; gap:10px; z-index: 999; }
+  .toast { background: var(--card); border:1px solid var(--accent); border-left: 4px solid var(--accent);
+    padding: 14px 16px; border-radius: 8px; max-width: 320px; box-shadow: 0 8px 24px rgba(0,0,0,.4);
+    animation: slidein .25s ease-out; }
+  .toast strong { display:block; margin-bottom:4px; }
+  .toast span { color: var(--muted); font-size: 13px; }
+  @keyframes slidein { from { transform: translateX(30px); opacity:0; } to { transform: translateX(0); opacity:1; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>📥 Enquiry Dashboard</h1>
+  <div><span id="status-dot"></span><span id="status-text">Connecting…</span></div>
+</header>
+
+<div id="toast-wrap"></div>
+
+<main>
+  <table id="table">
+    <thead>
+      <tr><th>Time</th><th>Name</th><th>Email</th><th>Subject</th><th>Message</th></tr>
+    </thead>
+    <tbody id="tbody"></tbody>
+  </table>
+  <p id="empty">No enquiries yet.</p>
+</main>
+
+<script>
+const tbody = document.getElementById('tbody');
+const empty = document.getElementById('empty');
+const dot = document.getElementById('status-dot');
+const statusText = document.getElementById('status-text');
+const toastWrap = document.getElementById('toast-wrap');
+
+if ('Notification' in window && Notification.permission === 'default') {
+  Notification.requestPermission();
+}
+
+function fmtTime(ts) {
+  try { return new Date(ts).toLocaleString(); } catch { return ts; }
+}
+
+function addRow(sub, isNew) {
+  empty.style.display = 'none';
+  const tr = document.createElement('tr');
+  if (isNew) tr.className = 'new-row';
+  tr.innerHTML = `<td>${fmtTime(sub.timestamp)}</td><td>${escapeHtml(sub.name)}</td>
+    <td>${escapeHtml(sub.email)}</td><td>${escapeHtml(sub.subject)}</td><td>${escapeHtml(sub.message)}</td>`;
+  tbody.prepend(tr);
+}
+
+function escapeHtml(str) {
+  return String(str || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function showToast(sub) {
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.innerHTML = `<strong>New enquiry from ${escapeHtml(sub.name)}</strong><span>${escapeHtml(sub.subject || '')}</span>`;
+  toastWrap.appendChild(t);
+  setTimeout(() => t.remove(), 8000);
+
+  if ('Notification' in window && Notification.permission === 'granted') {
+    new Notification('New enquiry from ' + sub.name, { body: sub.subject || 'View dashboard for details' });
+  }
+
+  try {
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = audioCtx.createOscillator();
+    osc.frequency.value = 880;
+    osc.connect(audioCtx.destination);
+    osc.start(); osc.stop(audioCtx.currentTime + 0.15);
+  } catch {}
+}
+
+// Load existing submissions
+fetch('/admin/submissions').then(r => r.json()).then(data => {
+  const list = data.submissions || [];
+  if (list.length === 0) { empty.style.display = 'block'; }
+  list.forEach(sub => addRow(sub, false));
+}).catch(() => { empty.textContent = 'Unable to load submissions.'; empty.style.display = 'block'; });
+
+// Live updates
+const es = new EventSource('/admin/events');
+es.onopen = () => { dot.classList.add('live'); statusText.textContent = 'Live'; };
+es.onerror = () => { dot.classList.remove('live'); statusText.textContent = 'Reconnecting…'; };
+es.onmessage = (e) => {
+  const sub = JSON.parse(e.data);
+  addRow(sub, true);
+  showToast(sub);
+};
+</script>
+</body>
+</html>
