@@ -871,11 +871,44 @@ section { padding: 90px 0; }
 }
 
 /* ABOUT SECTION & HORIZONTAL TRUSTED PARTNERS */
-.about { background-color: var(--light-bg); }
+.about {
+    position: relative;
+    overflow: hidden;
+    background-color: var(--light-bg);
+}
+
+.about::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: url('Picture/ethanol.jpg') center 35% / cover no-repeat;
+    filter: blur(1px);
+    opacity: 0.92;
+    transform: scale(1.03);
+}
+
+.about::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.55);
+}
+
+.about > .container {
+    position: relative;
+    z-index: 1;
+}
+
 .about-grid {
     display: grid;
     grid-template-columns: 1fr;
     gap: 40px;
+}
+
+.about .section-title p,
+.about-text,
+.about-partners > p {
+    color: #263746;
 }
 
 .pillars {
