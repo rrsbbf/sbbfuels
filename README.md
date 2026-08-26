@@ -1,4 +1,4 @@
-# SBBFuels Website (local development)
+# SBBFuels Website
 
 This is a small static website with a lightweight Express backend to collect contact form submissions.
 
