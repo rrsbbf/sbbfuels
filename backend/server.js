@@ -53,6 +53,22 @@ app.get('/admin/submissions', (req, res) => {
   }
 });
 
+app.get('/admin/download/submissions.xlsx', (req, res) => {
+  if (!fs.existsSync(excelFile)) {
+    return res.status(404).send('No submission data is available yet.');
+  }
+
+  res.download(excelFile, 'sbbfuels-submissions.xlsx');
+});
+
+app.get('/admin/download/submissions.csv', (req, res) => {
+  if (!fs.existsSync(submissionsFile)) {
+    return res.status(404).send('No submission data is available yet.');
+  }
+
+  res.download(submissionsFile, 'sbbfuels-submissions.csv');
+});
+
 function ensureCsvHeader() {
   if (!fs.existsSync(dataDir)) {
     fs.mkdirSync(dataDir, { recursive: true });

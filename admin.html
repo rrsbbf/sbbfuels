@@ -3,12 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <title>Admin — Enquiry Dashboard</title>
+<link rel="icon" type="image/png" href="Picture/logo.png">
 <style>
   :root { --accent:#1a7f37; --bg:#0f1115; --card:#171a21; --border:#2a2e38; --text:#e8eaee; --muted:#9aa1ac; }
   * { box-sizing: border-box; }
   body { margin:0; font-family: system-ui, Arial, sans-serif; background:var(--bg); color:var(--text); }
-  header { padding: 20px 28px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; }
+  header { padding: 20px 28px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; gap:20px; }
   header h1 { margin:0; font-size: 20px; }
+  .downloads { display:flex; gap:8px; }
+  .downloads a { color:var(--text); border:1px solid var(--border); border-radius:6px; padding:8px 12px; text-decoration:none; font-size:13px; }
+  .downloads a:hover { border-color:var(--accent); color:#fff; }
   #status-dot { display:inline-block; width:10px; height:10px; border-radius:50%; background:#e04b4b; margin-right:8px; }
   #status-dot.live { background: var(--accent); }
   main { padding: 24px 28px; max-width: 1000px; margin: 0 auto; }
@@ -30,6 +34,10 @@
 <body>
 <header>
   <h1>📥 Enquiry Dashboard</h1>
+  <div class="downloads" aria-label="Download submissions">
+    <a href="/admin/download/submissions.xlsx" download>Download Excel</a>
+    <a href="/admin/download/submissions.csv" download>Download CSV</a>
+  </div>
   <div><span id="status-dot"></span><span id="status-text">Connecting…</span></div>
 </header>
 

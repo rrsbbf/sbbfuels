@@ -76,6 +76,7 @@ header {
     height: 68px;
     width: auto;
     flex-shrink: 0;
+    mix-blend-mode: multiply;
 }
 .logo h2 {
     margin: 0;
