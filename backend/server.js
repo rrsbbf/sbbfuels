@@ -1,7 +1,7 @@
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
-const XLSX = require('xlsx');
+const XLSX = require('xlsx-js-style');
 const nodemailer = require('nodemailer');
 const projectRoot = path.resolve(__dirname, '..');
 try { require('dotenv').config({ path: path.join(projectRoot, '.env') }); } catch (e) { /* dotenv not installed — env vars can still be set manually */ }
@@ -13,6 +13,43 @@ const excelFile = path.join(dataDir, 'submissions.xlsx');
 
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static(projectRoot));
+
+function readSubmissions() {
+  const sourceFile = fs.existsSync(excelFile) ? excelFile : submissionsFile;
+  if (!fs.existsSync(sourceFile)) return [];
+
+  const workbook = XLSX.readFile(sourceFile);
+  const ws = workbook.Sheets[workbook.SheetNames[0]];
+  return XLSX.utils.sheet_to_json(ws, { defval: '' }).map((submission, index) => ({
+    id: submission.id || `legacy-${index}-${submission.timestamp || 'entry'}`,
+    timestamp: submission.timestamp || '',
+    name: submission.name || '',
+    email: submission.email || '',
+    subject: submission.subject || '',
+    message: submission.message || '',
+    status: submission.status || 'Active',
+    deletedAt: submission.deletedAt || ''
+  }));
+}
+
+function writeSubmissions(submissions) {
+  if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
+
+  const ws = XLSX.utils.json_to_sheet(submissions);
+  const deletedStyle = { font: { color: { rgb: 'FF0000' } } };
+  for (let rowIndex = 1; rowIndex <= submissions.length; rowIndex += 1) {
+    if (submissions[rowIndex - 1].status !== 'Deleted') continue;
+    for (let columnIndex = 0; columnIndex < 8; columnIndex += 1) {
+      const cell = XLSX.utils.encode_cell({ r: rowIndex, c: columnIndex });
+      if (ws[cell]) ws[cell].s = deletedStyle;
+    }
+  }
+
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, ws, 'submissions');
+  XLSX.writeFile(workbook, excelFile);
+  fs.writeFileSync(submissionsFile, XLSX.utils.sheet_to_csv(ws), 'utf8');
+}
 
 // ---- Live admin alert plumbing (Server-Sent Events) ----
 // Any browser tab with admin.html open receives a push the instant a form is submitted,
@@ -42,14 +79,29 @@ app.get('/admin/events', (req, res) => {
 // Returns all recorded submissions (newest first) for the admin dashboard table
 app.get('/admin/submissions', (req, res) => {
   try {
-    if (!fs.existsSync(excelFile)) return res.json({ submissions: [] });
-    const workbook = XLSX.readFile(excelFile);
-    const ws = workbook.Sheets[workbook.SheetNames[0]];
-    const data = XLSX.utils.sheet_to_json(ws, { defval: '' });
-    res.json({ submissions: data.reverse() });
+    res.json({ submissions: readSubmissions().reverse() });
   } catch (error) {
     console.error('Error reading submissions:', error);
     res.status(500).json({ submissions: [], message: 'Unable to read submissions.' });
+  }
+});
+
+app.delete('/admin/submissions/:id', (req, res) => {
+  try {
+    const submissions = readSubmissions();
+    const submission = submissions.find(entry => entry.id === req.params.id);
+    if (!submission) return res.status(404).json({ success: false, message: 'Submission not found.' });
+
+    if (submission.status !== 'Deleted') {
+      submission.status = 'Deleted';
+      submission.deletedAt = new Date().toISOString();
+      writeSubmissions(submissions);
+    }
+
+    res.json({ success: true, submission });
+  } catch (error) {
+    console.error('Submission delete error:', error);
+    res.status(500).json({ success: false, message: 'Unable to delete this submission.' });
   }
 });
 
@@ -75,7 +127,7 @@ function ensureCsvHeader() {
   }
 
   if (!fs.existsSync(submissionsFile)) {
-    fs.writeFileSync(submissionsFile, 'timestamp,name,email,subject,message\n', 'utf8');
+    fs.writeFileSync(submissionsFile, 'id,timestamp,name,email,subject,message,status,deletedAt\n', 'utf8');
   }
 }
 
@@ -83,31 +135,18 @@ app.post('/submit-contact', (req, res) => {
   try {
     ensureCsvHeader();
     const timestamp = new Date().toISOString();
-    const name = (req.body.name || '').replace(/\r?\n/g, ' ').replace(/"/g, '""');
-    const email = (req.body.email || '').replace(/\r?\n/g, ' ').replace(/"/g, '""');
-    const subject = (req.body.subject || '').replace(/\r?\n/g, ' ').replace(/"/g, '""');
-    const message = (req.body.message || '').replace(/\r?\n/g, ' ').replace(/"/g, '""');
-
-    const row = `"${timestamp}","${name}","${email}","${subject}","${message}"\n`;
-    fs.appendFileSync(submissionsFile, row, 'utf8');
-
-    // Update Excel file (submissions.xlsx) with latest submissions
-    try {
-      let data = [];
-      if (fs.existsSync(excelFile)) {
-        const workbook = XLSX.readFile(excelFile);
-        const ws = workbook.Sheets[workbook.SheetNames[0]];
-        data = XLSX.utils.sheet_to_json(ws, { defval: '' });
-      }
-
-      data.push({ timestamp, name, email, subject, message });
-      const wsNew = XLSX.utils.json_to_sheet(data);
-      const wbNew = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wbNew, wsNew, 'submissions');
-      XLSX.writeFile(wbNew, excelFile);
-    } catch (ex) {
-      console.error('Excel write error:', ex);
-    }
+    const clean = value => String(value || '').replace(/\r?\n/g, ' ');
+    const name = clean(req.body.name);
+    const email = clean(req.body.email);
+    const subject = clean(req.body.subject);
+    const message = clean(req.body.message);
+    const submission = {
+      id: require('crypto').randomUUID(), timestamp, name, email, subject, message,
+      status: 'Active', deletedAt: ''
+    };
+    const data = readSubmissions();
+    data.push(submission);
+    writeSubmissions(data);
 
     // Live alert to any open admin dashboard tab (works instantly, no setup needed)
     broadcastToAdmins({ timestamp, name, email, subject, message });

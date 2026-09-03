@@ -23,6 +23,7 @@ Open in your browser at `http://localhost:3000` (do not open `index.html` via `f
 
 - CSV: `data/submissions.csv`
 - Excel: `data/submissions.xlsx` (updated on each form submission)
+- Admin deletion is a soft delete: the submission stays in both exports with `status` set to `Deleted`, and its Excel row is colored red.
 
 ## Admin alerts — live dashboard (works immediately, no setup)
 

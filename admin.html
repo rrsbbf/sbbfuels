@@ -22,6 +22,10 @@
   tr.new-row { animation: flash 2.5s ease-out; }
   @keyframes flash { 0% { background: rgba(26,127,55,.35); } 100% { background: transparent; } }
   #empty { color: var(--muted); margin-top: 20px; }
+  .delete-btn { color:#ff8d8d; background:transparent; border:1px solid #6d3434; border-radius:5px; padding:6px 9px; cursor:pointer; }
+  .delete-btn:hover { color:#fff; background:#6d3434; }
+  .deleted-row td { color:#ff6b6b; text-decoration: line-through; }
+  .deleted-row .delete-btn { color:#ff6b6b; border-color:#6d3434; cursor:default; text-decoration:none; }
   #toast-wrap { position: fixed; top: 20px; right: 20px; display:flex; flex-direction:column; gap:10px; z-index: 999; }
   .toast { background: var(--card); border:1px solid var(--accent); border-left: 4px solid var(--accent);
     padding: 14px 16px; border-radius: 8px; max-width: 320px; box-shadow: 0 8px 24px rgba(0,0,0,.4);
@@ -46,7 +50,7 @@
 <main>
   <table id="table">
     <thead>
-      <tr><th>Time</th><th>Name</th><th>Email</th><th>Subject</th><th>Message</th></tr>
+      <tr><th>Time</th><th>Name</th><th>Email</th><th>Subject</th><th>Message</th><th>Status</th><th>Action</th></tr>
     </thead>
     <tbody id="tbody"></tbody>
   </table>
@@ -73,8 +77,33 @@ function addRow(sub, isNew) {
   const tr = document.createElement('tr');
   if (isNew) tr.className = 'new-row';
   tr.innerHTML = `<td>${fmtTime(sub.timestamp)}</td><td>${escapeHtml(sub.name)}</td>
-    <td>${escapeHtml(sub.email)}</td><td>${escapeHtml(sub.subject)}</td><td>${escapeHtml(sub.message)}</td>`;
+    <td>${escapeHtml(sub.email)}</td><td>${escapeHtml(sub.subject)}</td><td>${escapeHtml(sub.message)}</td>
+    <td>${escapeHtml(sub.status || 'Active')}</td><td><button class="delete-btn" type="button">Delete</button></td>`;
+  tr.dataset.id = sub.id;
+  const deleteButton = tr.querySelector('.delete-btn');
+  if (sub.status === 'Deleted') {
+    tr.classList.add('deleted-row');
+    deleteButton.textContent = 'Deleted';
+    deleteButton.disabled = true;
+  } else {
+    deleteButton.addEventListener('click', () => deleteSubmission(sub, tr, deleteButton));
+  }
   tbody.prepend(tr);
+}
+
+async function deleteSubmission(sub, row, button) {
+  if (!window.confirm(`Delete the enquiry from ${sub.name || 'this user'}?`)) return;
+  button.disabled = true;
+  try {
+    const response = await fetch(`/admin/submissions/${encodeURIComponent(sub.id)}`, { method: 'DELETE' });
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.message || 'Delete failed.');
+    row.remove();
+    if (!tbody.children.length) empty.style.display = 'block';
+  } catch (error) {
+    button.disabled = false;
+    alert(error.message || 'Unable to delete this enquiry.');
+  }
 }
 
 function escapeHtml(str) {
@@ -103,7 +132,7 @@ function showToast(sub) {
 
 // Load existing submissions
 fetch('/admin/submissions').then(r => r.json()).then(data => {
-  const list = data.submissions || [];
+  const list = (data.submissions || []).filter(sub => sub.status !== 'Deleted');
   if (list.length === 0) { empty.style.display = 'block'; }
   list.forEach(sub => addRow(sub, false));
 }).catch(() => { empty.textContent = 'Unable to load submissions.'; empty.style.display = 'block'; });

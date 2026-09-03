@@ -1,9 +1,6 @@
-timestamp,name,email,subject,message
-"2026-08-19T10:59:31.911Z","Smoke Test","smoke@example.com","Storage check","Test submission"
-"2026-08-19T11:02:04.801Z","Aniket","aniket@gmail.com","AA","AA"
-"2026-08-19T12:53:04.310Z","sbbfuels-attendance","rishiraj@sbbfuels.com","vasA","arfsr"
-"2026-08-19T13:11:59.969Z","sbbfuels-attendance","rishiraj@sbbfuels.com","vasAffjyy","f67jyug"
-"2026-08-25T11:58:50.900Z","rishir","FBuoiare@gmail.com","fuwbacd","scdhbvkcuya"
-"2026-08-25T12:06:34.426Z","Rishi Raj Sharma","rishiraj@sbbfuels.com","fwew","WFE"
-"2026-08-25T12:06:56.365Z","Rishi Raj Sharma","rishiraj@sbbfuels.com","VDA","DEEPA"
-"2026-08-27T05:53:18.588Z","sbbfuels-attendance","rishiraj@sbbfuels.com","vasA","werd"
+id,timestamp,name,email,subject,message,status,deletedAt
+legacy-0-2026-08-25T11:58:50.900Z,2026-08-25T11:58:50.900Z,rishir,FBuoiare@gmail.com,fuwbacd,scdhbvkcuya,Deleted,2026-09-03T07:18:01.162Z
+legacy-1-2026-08-25T12:06:34.426Z,2026-08-25T12:06:34.426Z,Rishi Raj Sharma,rishiraj@sbbfuels.com,fwew,WFE,Deleted,2026-09-03T07:18:08.054Z
+legacy-2-2026-08-25T12:06:56.365Z,2026-08-25T12:06:56.365Z,Rishi Raj Sharma,rishiraj@sbbfuels.com,VDA,DEEPA,Deleted,2026-09-03T07:18:11.041Z
+legacy-3-2026-08-27T05:53:18.588Z,2026-08-27T05:53:18.588Z,sbbfuels-attendance,rishiraj@sbbfuels.com,vasA,werd,Active,
+75b64355-a282-42b1-b36e-6b9282523af6,2026-09-03T07:17:45.767Z,Rishiraj,rishi@gmail.com,DDGS,I want that for my poultry farm,Active,
