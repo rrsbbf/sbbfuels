@@ -57,6 +57,7 @@ header {
     align-items: center;
     padding: 15px 0;
     gap: 20px;
+    min-width: 0;
 }
 
 /* LOGO — icon left, two-line text right, vertically centered */
@@ -64,6 +65,7 @@ header {
     display: flex;
     align-items: center;
     gap: 16px;
+    min-width: 0;
     text-decoration: none;
     cursor: pointer;
     transition: transform 0.2s ease, opacity 0.2s ease;
@@ -110,6 +112,7 @@ nav {
     display: flex;
     justify-content: flex-end;
     align-items: center;
+    min-width: 0;
 }
 
 /* Navigation Hover Effects */
@@ -133,6 +136,11 @@ nav ul li a {
     padding: 8px 12px;
     transition: color 0.5s ease;
     display: block;
+}
+
+img,
+svg {
+    max-width: 100%;
 }
 
 /* Top and bottom borders animation */
@@ -1094,11 +1102,30 @@ footer {
 }
 
 /* Responsive Breakpoints */
-@media (max-width: 992px) {
+@media (max-width: 1250px) {
     .products-grid, .fuel-ethanol-banner, .contact-wrapper {
         grid-template-columns: 1fr;
     }
-    nav ul { gap: 10px; }
+    .navbar {
+        flex-direction: column;
+        gap: 12px;
+        padding: 12px 0;
+    }
+
+    nav {
+        width: 100%;
+        justify-content: center;
+    }
+
+    nav ul {
+        width: 100%;
+        justify-content: center;
+        gap: 6px;
+        flex-wrap: wrap;
+        white-space: normal;
+        overflow-x: visible;
+    }
+
     nav ul li a { font-size: 0.85rem; padding: 6px 8px; }
 }
 
