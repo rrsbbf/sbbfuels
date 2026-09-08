@@ -24,7 +24,7 @@ body {
 
 .container {
     width: 90%;
-    max-width: 1200px;
+    max-width: 1500px;
     margin: 0 auto;
 }
 
@@ -120,10 +120,10 @@ nav ul {
     display: flex;
     list-style: none;
     align-items: center;
-    gap: 16px;
-    flex-wrap: wrap;
+    gap: 10px;
+    flex-wrap: nowrap;
     justify-content: flex-end;
-    white-space: normal;
+    white-space: nowrap;
     overflow: visible;
     padding-bottom: 2px;
 }
@@ -131,9 +131,9 @@ nav ul li a {
     text-decoration: none;
     color: var(--dark-text);
     font-weight: 500;
-    font-size: 0.92rem;
+    font-size: 0.86rem;
     position: relative;
-    padding: 8px 12px;
+    padding: 7px 8px;
     transition: color 0.5s ease;
     display: block;
 }
@@ -1118,6 +1118,9 @@ footer {
         width: 100%;
         justify-content: center;
         gap: 6px;
+        flex-wrap: nowrap;
+        white-space: nowrap;
+        overflow: visible;
     }
 }
 
@@ -1140,12 +1143,12 @@ footer {
         width: 100%;
         justify-content: center;
         gap: 6px;
-        flex-wrap: wrap;
-        white-space: normal;
-        overflow-x: visible;
+        flex-wrap: nowrap;
+        white-space: nowrap;
+        overflow: visible;
     }
 
-    nav ul li a { font-size: 0.85rem; padding: 6px 8px; }
+    nav ul li a { font-size: 0.75rem; padding: 6px 5px; }
 }
 
 @media (max-width: 768px) {
@@ -1185,20 +1188,20 @@ footer {
 
     nav ul {
         width: 100%;
-        justify-content: flex-start;
-        gap: 4px;
-        flex-wrap: wrap;
-        white-space: normal;
-        overflow-x: visible;
+        justify-content: center;
+        gap: 2px;
+        flex-wrap: nowrap;
+        white-space: nowrap;
+        overflow: visible;
     }
 
     nav ul li a {
-        font-size: 0.78rem;
-        padding: 6px 7px;
+        font-size: 0.68rem;
+        padding: 6px 3px;
     }
 
     .btn-nav {
-        padding: 6px 11px !important;
+        padding: 6px 7px !important;
     }
 
     .hero {
