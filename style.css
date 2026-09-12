@@ -78,7 +78,6 @@ header {
     height: 68px;
     width: auto;
     flex-shrink: 0;
-    mix-blend-mode: multiply;
 }
 .logo h2 {
     margin: 0;
@@ -120,10 +119,10 @@ nav ul {
     display: flex;
     list-style: none;
     align-items: center;
-    gap: 16px;
-    flex-wrap: wrap;
+    gap: 10px;
+    flex-wrap: nowrap;
     justify-content: flex-end;
-    white-space: normal;
+    white-space: nowrap;
     overflow: visible;
     padding-bottom: 2px;
 }
@@ -131,9 +130,9 @@ nav ul li a {
     text-decoration: none;
     color: var(--dark-text);
     font-weight: 500;
-    font-size: 0.92rem;
+    font-size: 0.86rem;
     position: relative;
-    padding: 8px 12px;
+    padding: 7px 8px;
     transition: color 0.5s ease;
     display: block;
 }
@@ -1101,6 +1100,167 @@ footer {
     font-size: 0.9rem;
 }
 
+/* System dark theme */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --light-bg: #142526;
+        --dark-text: #dce9e8;
+    }
+
+    body {
+        background-color: #0d1718;
+        color: var(--dark-text);
+    }
+
+    .top-bar,
+    footer {
+        background-color: #091617;
+    }
+
+    header,
+    .primary-product-section,
+    .ethanol-uses,
+    .team,
+    .contact,
+    .card__info,
+    .step:hover,
+    .use-card:hover,
+    .member-card:hover,
+    .why-card,
+    .pillar,
+    .about-partners,
+    .partner-card-h:hover {
+        background-color: #102021;
+    }
+
+    header {
+        box-shadow: 0 2px 14px rgba(0, 0, 0, 0.35);
+    }
+
+    .logo img {
+        mix-blend-mode: normal;
+    }
+
+    .company-name-main,
+    .company-name-sub {
+        color: #b9e8e3;
+    }
+
+    nav ul li a {
+        color: #dce9e8;
+    }
+
+    nav ul li a::before {
+        border-color: #dce9e8;
+    }
+
+    nav ul li a::after {
+        background-color: #dce9e8;
+    }
+
+    .section-title p,
+    .partner-details p {
+        color: #aabdbc;
+    }
+
+    .primary-product-section::before {
+        background: rgba(13, 23, 24, 0.86);
+    }
+
+    .step,
+    .use-card,
+    .member-card {
+        background-color: #172d2e;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.24);
+    }
+
+    .step-num {
+        background-color: #102021;
+    }
+
+    .products,
+    .careers-directory {
+        background-color: #142526;
+    }
+
+    .product-card,
+    .why-card,
+    .about-partners {
+        background-color: #172d2e;
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.28);
+    }
+
+    .spec-table td {
+        border-color: #365354;
+    }
+
+    #by-products::after,
+    #why-choose-us::after,
+    .about::after {
+        background: rgba(9, 20, 21, 0.76);
+    }
+
+    #why-choose-us .section-title p,
+    .about .section-title p,
+    .about-text,
+    .about-partners > p {
+        color: #d5e2e1;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    }
+
+    .partner-card-h {
+        background-color: rgba(23, 45, 46, 0.92);
+        border-color: rgba(93, 203, 195, 0.24);
+    }
+
+    .partner-logo-frame {
+        background: linear-gradient(180deg, rgba(53, 162, 159, 0.2), rgba(11, 102, 106, 0.14));
+        box-shadow: inset 0 4px 10px rgba(255, 255, 255, 0.08);
+    }
+
+    .member-img-wrapper {
+        background-color: #203536;
+    }
+
+    .contact-form input,
+    .contact-form textarea {
+        background-color: #172d2e;
+        color: #e4f0ef;
+        border-color: #426263;
+    }
+
+    .contact-form input::placeholder,
+    .contact-form textarea::placeholder {
+        color: #91a9a8;
+    }
+
+    .careers-sidebar,
+    .openings-heading,
+    .role-list,
+    .role-card {
+        border-color: #315051;
+    }
+
+    .careers-sidebar h1,
+    .openings-heading h2,
+    .role-card h3 {
+        color: #dce9e8;
+    }
+
+    .sidebar-intro,
+    .directory-links a,
+    .role-meta,
+    .career-note {
+        color: #aabdbc;
+    }
+
+    .sidebar-contact span,
+    .openings-count,
+    .meta-divider {
+        color: #829a99;
+    }
+}
+
 /* Responsive Breakpoints */
 @media (max-width: 1500px) {
     .navbar {
@@ -1118,6 +1278,8 @@ footer {
         width: 100%;
         justify-content: center;
         gap: 6px;
+        flex-wrap: wrap;
+        white-space: normal;
     }
 }
 
@@ -1142,10 +1304,9 @@ footer {
         gap: 6px;
         flex-wrap: wrap;
         white-space: normal;
-        overflow-x: visible;
     }
 
-    nav ul li a { font-size: 0.85rem; padding: 6px 8px; }
+    nav ul li a { font-size: 0.75rem; padding: 6px 5px; }
 }
 
 @media (max-width: 768px) {
@@ -1185,20 +1346,19 @@ footer {
 
     nav ul {
         width: 100%;
-        justify-content: flex-start;
-        gap: 4px;
+        justify-content: center;
+        gap: 2px;
         flex-wrap: wrap;
         white-space: normal;
-        overflow-x: visible;
     }
 
     nav ul li a {
-        font-size: 0.78rem;
-        padding: 6px 7px;
+        font-size: 0.68rem;
+        padding: 6px 3px;
     }
 
     .btn-nav {
-        padding: 6px 11px !important;
+        padding: 6px 7px !important;
     }
 
     .hero {
