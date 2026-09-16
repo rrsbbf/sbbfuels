@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SBB Fuels Local Test Page</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body { min-height: 100vh; padding: 2rem 1rem; background: #f4f7f2; }
+        .test-panel { max-width: 760px; margin: 0 auto; padding: 2rem; background: #fff; border: 1px solid #dbe5d8; border-radius: 8px; box-shadow: 0 12px 30px rgba(24, 54, 31, .08); }
+        .test-panel h1 { margin-top: 0; }
+        .test-links { display: flex; flex-wrap: wrap; gap: .75rem; margin: 1.5rem 0; }
+        .test-links a, button { display: inline-block; padding: .7rem 1rem; border: 0; border-radius: 4px; background: #2d6a4f; color: #fff; text-decoration: none; cursor: pointer; font: inherit; }
+        .test-links a.secondary { background: #52796f; }
+        .status { margin: 1rem 0; padding: .8rem 1rem; border-radius: 4px; background: #fff3cd; color: #664d03; }
+        .status.ok { background: #d1e7dd; color: #0f5132; }
+        form { display: grid; gap: .8rem; }
+        label { display: grid; gap: .35rem; font-weight: 600; }
+        input, textarea { padding: .7rem; border: 1px solid #b8c8bb; border-radius: 4px; font: inherit; }
+        textarea { min-height: 100px; resize: vertical; }
+        .result { min-height: 1.5rem; margin-top: 1rem; }
+        code { padding: .15rem .3rem; background: #eef2ed; border-radius: 3px; }
+    </style>
+</head>
+<body>
+    <main class="test-panel">
+        <h1>SBB Fuels Local Test Page</h1>
+        <p>This separate page is for trying the local server. It does not replace <code>index.html</code>.</p>
+
+        <div id="server-status" class="status">Checking the backend...</div>
+
+        <div class="test-links">
+            <a href="index.html">Open homepage</a>
+            <a class="secondary" href="admin.html">Open admin dashboard</a>
+        </div>
+
+        <h2>Test contact submission</h2>
+        <p>Submitting this form creates a real test entry in the local submissions files.</p>
+        <form id="test-form">
+            <label>Name <input name="name" required value="Local Test"></label>
+            <label>Email <input name="email" type="email" required value="test@example.com"></label>
+            <label>Subject <input name="subject" required value="Local server test"></label>
+            <label>Message <textarea name="message" required>This is a local test submission.</textarea></label>
+            <button type="submit">Send test submission</button>
+        </form>
+        <div id="result" class="result" aria-live="polite"></div>
+    </main>
+
+    <script>
+        const status = document.getElementById('server-status');
+        const result = document.getElementById('result');
+
+        fetch('/_status', { cache: 'no-store' })
+            .then(response => {
+                if (!response.ok) throw new Error(`Status ${response.status}`);
+                status.textContent = 'Backend is running. The local endpoints can be tested.';
+                status.classList.add('ok');
+            })
+            .catch(error => {
+                status.textContent = `Backend check failed: ${error.message}. Run npm start and reload.`;
+            });
+
+        document.getElementById('test-form').addEventListener('submit', async event => {
+            event.preventDefault();
+            result.textContent = 'Sending...';
+            const form = event.currentTarget;
+            try {
+                const response = await fetch('/submit-contact', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams(new FormData(form))
+                });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.message || `Request failed (${response.status})`);
+                result.textContent = data.message || 'Test submission completed.';
+            } catch (error) {
+                result.textContent = `Test failed: ${error.message}`;
+            }
+        });
+    </script>
+</body>
+</html>

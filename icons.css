@@ -9,4 +9,7 @@
 .fa-flask::before { content: '\2697'; }
 .fa-vial::before { content: '\2697'; }
 .fa-droplet::before { content: '\25c6'; }
+.fa-location-dot { display: inline-block; position: relative; width: 1em; height: 1.2em; }
+.fa-location-dot::before { content: ''; position: absolute; top: 0.08em; left: 0.14em; width: 0.68em; height: 0.68em; border: 0.1em solid currentColor; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); }
+.fa-location-dot::after { content: ''; position: absolute; top: 0.31em; left: 0.37em; width: 0.22em; height: 0.22em; border-radius: 50%; background: currentColor; }
 .icon-location { display: inline-block; width: 8px; height: 10px; margin: 0 6px 0 1px; border: 1px solid currentColor; border-radius: 7px 7px 7px 0; transform: rotate(-45deg); }
