@@ -3,6 +3,8 @@
 .fa-envelope::before { content: '\2709'; }
 .fa-phone::before { content: '\260e'; }
 .fa-gears::before { content: '\2699'; }
+.fa-shield-halved::before { content: '\26E8'; }
+.fa-certificate::before { content: '\2714'; }
 .fa-flask-vial::before { content: '\2697'; }
 .fa-people-group::before { content: '\263a'; }
 .fa-leaf::before { content: '\2618'; }
