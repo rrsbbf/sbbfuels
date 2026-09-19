@@ -56,7 +56,13 @@
 
         body {
             font-family: "Inter", sans-serif;
-            background: var(--background);
+            background-color: var(--background);
+            background-image:
+                linear-gradient(rgba(3, 35, 29, .78), rgba(3, 35, 29, .78)),
+                url("Picture/Plant Side view.jpeg");
+            background-position: center;
+            background-size: cover;
+            background-attachment: fixed;
             color: var(--text);
             min-height: 100vh;
         }
@@ -114,8 +120,7 @@
             width: 48px;
             height: 48px;
             object-fit: contain;
-            mix-blend-mode: multiply;
-            filter: saturate(.9) contrast(1.05);
+            filter: brightness(1.8) saturate(1.15) contrast(1.05);
         }
 
         .brand-name {
@@ -587,7 +592,7 @@
             display: grid;
 
             grid-template-columns:
-                repeat(4, minmax(0, 1fr));
+                repeat(3, minmax(0, 1fr));
 
             gap: 18px;
         }
@@ -598,7 +603,9 @@
         ========================================================= */
 
         .card {
-            background: white;
+            background: rgba(255, 255, 255, .76);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
 
             border: 1px solid var(--border);
 
@@ -907,6 +914,11 @@
             box-shadow: var(--shadow);
         }
 
+        .hero-logo img,
+        .leaf-decoration img {
+            filter: brightness(1.8) saturate(1.15) contrast(1.05);
+        }
+
         .feature-image {
             position: absolute;
 
@@ -1025,10 +1037,6 @@
                 font-size: 32px;
             }
 
-            .feature-card {
-                grid-column: span 3;
-            }
-
         }
 
 
@@ -1065,10 +1073,6 @@
 
             .dashboard-grid {
                 grid-template-columns: repeat(2, 1fr);
-            }
-
-            .feature-card {
-                grid-column: span 2;
             }
 
         }
@@ -1126,10 +1130,6 @@
                 grid-template-columns: 1fr;
             }
 
-            .feature-card {
-                grid-column: span 1;
-            }
-
             .profile {
                 display: none;
             }
@@ -1150,8 +1150,14 @@
 
             body,
             .topbar {
-                background: #102a23;
+                background-color: rgba(16, 42, 35, .92);
                 color: var(--text);
+            }
+
+            body {
+                background-image:
+                    linear-gradient(rgba(3, 35, 29, .7), rgba(3, 35, 29, .7)),
+                    url("Picture/Plant Side view.jpeg");
             }
 
             .topbar {
@@ -1161,8 +1167,7 @@
             .brand-logo img,
             .hero-logo img,
             .leaf-decoration img {
-                mix-blend-mode: multiply;
-                filter: brightness(1.65) saturate(.82) contrast(1.08);
+                filter: brightness(2) saturate(1.15) contrast(1.08);
             }
 
             .brand-name,
@@ -1174,7 +1179,7 @@
 
             .search-box,
             .card {
-                background: #15352c;
+                background: rgba(21, 53, 44, .78);
                 border-color: #255044;
             }
 
@@ -1811,68 +1816,6 @@
 
 </div>
 
-
-
-<!-- =========================================================
-     FEATURE CARD
-========================================================= -->
-
-<div class="feature-card">
-
-    <div class="feature-image"></div>
-
-    <div class="feature-overlay"></div>
-
-    <div class="feature-content">
-
-        <h2>
-            Efficiency<br>
-            Transparency<br>
-            Sustainability
-        </h2>
-
-        <div class="feature-line"></div>
-
-    </div>
-
-
-    <div class="feature-stats">
-
-        <div class="feature-stat">
-
-            <div class="stat-icon">
-                <i data-lucide="leaf"></i>
-            </div>
-
-            Clean Energy
-
-        </div>
-
-
-        <div class="feature-stat">
-
-            <div class="stat-icon">
-                <i data-lucide="sprout"></i>
-            </div>
-
-            Sustainable Growth
-
-        </div>
-
-
-        <div class="feature-stat">
-
-            <div class="stat-icon">
-                <i data-lucide="globe"></i>
-            </div>
-
-            Better Tomorrow
-
-        </div>
-
-    </div>
-
-</div>
 
 
 </section>
