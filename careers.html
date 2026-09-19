@@ -7,8 +7,512 @@
     <link rel="icon" type="image/png" href="Picture/logo.png">
     <link rel="stylesheet" href="style.css?v=20260908">
     <link rel="stylesheet" href="icons.css">
+    <style>
+        .careers-page {
+            --career-ink: #17352d;
+            --career-teal: #0b666a;
+            --career-mint: #eaf5f2;
+            background: #fff;
+            color: var(--career-ink);
+        }
+
+        .careers-hero {
+            min-height: 430px;
+            display: grid;
+            place-items: center;
+            position: relative;
+            isolation: isolate;
+            overflow: hidden;
+            background: var(--career-teal);
+            background-image: linear-gradient(90deg, rgba(5, 48, 47, .68), rgba(5, 48, 47, .22)), url('Picture/Plant Photo_3.jpeg');
+            background-size: cover;
+            background-position: center;
+        }
+
+        .careers-hero::after {
+            content: '';
+            position: absolute;
+            inset: auto 0 0;
+            height: 8px;
+            background: var(--secondary-color);
+            z-index: -1;
+        }
+
+        .careers-hero-content {
+            width: min(90%, 1120px);
+            padding: 72px 0;
+            color: #fff;
+        }
+
+        .careers-hero-kicker,
+        .directory-kicker {
+            color: #a6ded1;
+            font-size: .76rem;
+            font-weight: 700;
+            letter-spacing: .22em;
+            text-transform: uppercase;
+        }
+
+        .careers-hero h1 {
+            max-width: 700px;
+            margin-top: 18px;
+            font-size: clamp(3.2rem, 8vw, 6.8rem);
+            font-weight: 300;
+            letter-spacing: -.045em;
+            line-height: .95;
+        }
+
+        .careers-hero p:last-child {
+            max-width: 520px;
+            margin-top: 24px;
+            color: rgba(255, 255, 255, .88);
+            font-size: 1.04rem;
+        }
+
+        .careers-section-nav {
+            border-bottom: 1px solid #dce8e3;
+            background: #fff;
+        }
+
+        .careers-section-nav .container {
+            min-height: 74px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: clamp(24px, 6vw, 78px);
+        }
+
+        .careers-section-nav a {
+            padding: 27px 0 24px;
+            border-bottom: 2px solid transparent;
+            color: #7b8985;
+            font-size: .75rem;
+            font-weight: 700;
+            letter-spacing: .16em;
+            text-transform: uppercase;
+        }
+
+        .careers-section-nav a:hover,
+        .careers-section-nav a[aria-current="page"] {
+            border-color: var(--career-teal);
+            color: var(--career-teal);
+        }
+
+        .values-section {
+            padding: 86px 0 92px;
+            background: var(--career-mint);
+            scroll-margin-top: 78px;
+        }
+
+        .values-heading {
+            display: flex;
+            align-items: end;
+            justify-content: space-between;
+            gap: 30px;
+            margin-bottom: 38px;
+        }
+
+        .values-heading > div,
+        .values-heading > p {
+            flex: 1;
+        }
+
+        .values-heading h2 {
+            margin-top: 13px;
+            color: var(--career-ink);
+            font-size: clamp(2rem, 4vw, 3.6rem);
+            font-weight: 400;
+            letter-spacing: -.04em;
+            line-height: 1;
+        }
+
+        .values-heading p:last-child {
+            color: #5d716b;
+            font-size: .98rem;
+            line-height: 1.55;
+            text-align: right;
+        }
+
+        .values-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            border-top: 1px solid rgba(11, 102, 106, .25);
+            border-left: 1px solid rgba(11, 102, 106, .25);
+        }
+
+        .value-card {
+            min-height: 260px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 25px 22px 24px;
+            border-right: 1px solid rgba(11, 102, 106, .25);
+            border-bottom: 1px solid rgba(11, 102, 106, .25);
+            background: rgba(255, 255, 255, .42);
+            transition: background-color .25s ease, transform .25s ease, box-shadow .25s ease;
+        }
+
+        .value-card:hover,
+        .value-card:focus-within {
+            z-index: 1;
+            background: #fff;
+            transform: translateY(-8px);
+            box-shadow: 0 18px 36px rgba(23, 53, 45, .13);
+        }
+
+        .value-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 48px;
+            height: 48px;
+            border: 1px solid rgba(11, 102, 106, .28);
+            border-radius: 50%;
+            color: var(--career-teal);
+            font-size: 1.45rem;
+            line-height: 1;
+            transition: background-color .25s ease, color .25s ease, transform .25s ease;
+        }
+
+        .value-card:hover .value-icon,
+        .value-card:focus-within .value-icon {
+            background: var(--career-teal);
+            color: #fff;
+            transform: scale(1.08);
+        }
+
+        .value-icon.fa-shield-halved::before {
+            font-size: 1.55rem;
+        }
+
+        .value-icon.fa-certificate::before {
+            font-size: 1.35rem;
+        }
+
+        .value-icon.fa-gears::before {
+            font-size: 1.4rem;
+        }
+
+        .value-icon.fa-leaf::before {
+            font-size: 1.5rem;
+        }
+
+        .value-card h3 {
+            margin-top: 38px;
+            color: var(--career-ink);
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .value-card h3::after {
+            content: '';
+            display: block;
+            width: 30px;
+            height: 2px;
+            margin-top: 15px;
+            background: var(--secondary-color);
+            transition: width .25s ease;
+        }
+
+        .value-card:hover h3::after,
+        .value-card:focus-within h3::after {
+            width: 72px;
+        }
+
+        .value-card ul {
+            display: grid;
+            gap: 8px;
+            margin-top: 20px;
+            padding-left: 17px;
+            color: #5d716b;
+            font-size: .88rem;
+            line-height: 1.45;
+        }
+
+        .value-card li::marker {
+            color: var(--secondary-color);
+        }
+
+        .value-card > div {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .careers-directory {
+            padding: 92px 0 110px;
+            background: #fff;
+        }
+
+        .careers-layout {
+            display: grid;
+            grid-template-columns: minmax(220px, .65fr) minmax(0, 1.35fr);
+            gap: clamp(46px, 9vw, 150px);
+            align-items: start;
+        }
+
+        .careers-sidebar {
+            position: sticky;
+            top: 110px;
+        }
+
+        .careers-sidebar .directory-kicker,
+        .openings-heading .directory-kicker {
+            color: var(--career-teal);
+        }
+
+        .careers-sidebar h2,
+        .careers-sidebar h1 {
+            margin-top: 18px;
+            color: var(--career-ink);
+            font-size: clamp(2.3rem, 4vw, 4.2rem);
+            font-weight: 400;
+            letter-spacing: -.04em;
+            line-height: 1;
+        }
+
+        .sidebar-intro {
+            max-width: 300px;
+            margin-top: 25px;
+            color: #657873;
+            font-size: 1rem;
+        }
+
+        .directory-links {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 13px;
+            margin-top: 34px;
+        }
+
+        .directory-links a,
+        .career-note a {
+            color: var(--career-teal);
+            font-size: .82rem;
+            font-weight: 700;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+        }
+
+        .directory-links a:hover,
+        .career-note a:hover {
+            color: var(--primary-color);
+            text-decoration: underline;
+        }
+
+        .openings-heading {
+            display: flex;
+            align-items: end;
+            justify-content: space-between;
+            gap: 20px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid #dce8e3;
+        }
+
+        .openings-heading h2 {
+            margin-top: 12px;
+            color: var(--career-ink);
+            font-size: clamp(1.9rem, 3vw, 3rem);
+            font-weight: 400;
+            letter-spacing: -.035em;
+        }
+
+        .openings-count {
+            color: #82938d;
+            font-size: .72rem;
+            font-weight: 700;
+            letter-spacing: .12em;
+            white-space: nowrap;
+        }
+
+        .role-list {
+            display: grid;
+            gap: 0;
+        }
+
+        .role-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 28px;
+            padding: 30px 0;
+            border-bottom: 1px solid #dce8e3;
+            transition: padding .2s ease, background-color .2s ease;
+        }
+
+        .role-card:hover {
+            padding-right: 14px;
+            padding-left: 14px;
+            background: var(--career-mint);
+        }
+
+        .role-type {
+            color: var(--career-teal);
+            font-size: .7rem;
+            font-weight: 700;
+            letter-spacing: .14em;
+            text-transform: uppercase;
+        }
+
+        .role-copy h3 {
+            margin-top: 8px;
+            color: var(--career-ink);
+            font-size: clamp(1.15rem, 2vw, 1.5rem);
+            font-weight: 600;
+        }
+
+        .role-meta {
+            margin-top: 9px;
+            color: #7b8985;
+            font-size: .88rem;
+        }
+
+        .icon-location::before {
+            content: '\2022';
+            display: inline-block;
+            margin-right: 8px;
+            color: var(--secondary-color);
+        }
+
+        .meta-divider {
+            margin: 0 8px;
+            color: #c1ccc8;
+        }
+
+        .apply-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            min-width: 178px;
+            min-height: 52px;
+            padding: 12px 16px;
+            color: #fff;
+            font-size: .72rem;
+            font-weight: 700;
+            letter-spacing: .06em;
+            line-height: 1.2;
+            text-align: center;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .apply-button span,
+        .career-note a span {
+            margin-left: 8px;
+            font-size: 1.1rem;
+        }
+
+        .apply-button:hover {
+            color: #fff;
+        }
+
+        .career-note {
+            display: flex;
+            justify-content: space-between;
+            gap: 30px;
+            margin-top: 44px;
+            padding: 27px 28px;
+            background: var(--career-mint);
+        }
+
+        .career-note p {
+            max-width: 490px;
+            color: #5d716b;
+            font-size: .94rem;
+        }
+
+        .career-note strong {
+            color: var(--career-ink);
+        }
+
+        @media (max-width: 760px) {
+            .careers-hero {
+                min-height: 390px;
+                background-position: 58% center;
+            }
+
+            .careers-section-nav .container {
+                justify-content: flex-start;
+                gap: 25px;
+                overflow-x: auto;
+            }
+
+            .careers-section-nav a {
+                flex: 0 0 auto;
+            }
+
+            .careers-directory {
+                padding: 60px 0 75px;
+            }
+
+            .values-section {
+                padding: 62px 0 70px;
+            }
+
+            .values-heading {
+                display: block;
+            }
+
+            .values-heading p:last-child {
+                margin-top: 20px;
+                text-align: left;
+            }
+
+            .values-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .careers-layout {
+                grid-template-columns: 1fr;
+                gap: 55px;
+            }
+
+            .careers-sidebar {
+                position: static;
+            }
+
+            .directory-links {
+                flex-direction: row;
+                flex-wrap: wrap;
+                gap: 18px 25px;
+            }
+
+            .openings-heading,
+            .career-note,
+            .role-card {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .role-card {
+                gap: 15px;
+            }
+
+            .role-card:hover {
+                padding-left: 10px;
+                padding-right: 10px;
+            }
+
+            .career-note {
+                gap: 18px;
+            }
+        }
+
+        @media (max-width: 460px) {
+            .values-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .value-card {
+                min-height: 225px;
+            }
+        }
+    </style>
 </head>
-<body>
+<body class="careers-page">
     <div class="top-bar">
         <div class="container">
             <span><i class="fa-solid fa-envelope"></i> shreebalajibiosolutions@gmail.com</span>
@@ -39,6 +543,85 @@
     </header>
 
     <main>
+        <section class="careers-hero" aria-labelledby="careers-title">
+            <div class="careers-hero-content">
+                <p class="careers-hero-kicker">Careers at ShreeBalaji Biosolutions Fuels</p>
+                <h1 id="careers-title">Join our team</h1>
+                <p>Build a cleaner energy future with people who care about responsible growth, better processes, and meaningful work.</p>
+            </div>
+        </section>
+
+        <nav class="careers-section-nav" aria-label="Career page navigation">
+            <div class="container">
+                <a href="index.html#about">Company</a>
+                <a href="#values">Values</a>
+                <a href="index.html#leaders">Our People</a>
+                <a href="careers.html" aria-current="page">Careers</a>
+                <a href="index.html#contact">Contact</a>
+            </div>
+        </nav>
+
+        <section class="values-section" id="values" aria-labelledby="values-title">
+            <div class="container">
+                <div class="values-heading">
+                    <div>
+                        <p class="directory-kicker">WHAT GUIDES US</p>
+                        <h2 id="values-title">Values in action</h2>
+                    </div>
+                    <p>Our standards shape every decision, from the way we operate our plant to the way we support our people and communities.</p>
+                </div>
+
+                <div class="values-grid">
+                    <article class="value-card">
+                        <div>
+                            <i class="value-icon fa-solid fa-leaf" aria-hidden="true"></i>
+                            <h3>Environmental Sustainability</h3>
+                            <ul>
+                                <li>Zero liquid discharge (ZLD) implementation across operations.</li>
+                                <li>Lowering carbon footprint via circular economy co-products.</li>
+                                <li>Maximizing water recycling and conservation technologies.</li>
+                            </ul>
+                        </div>
+                    </article>
+
+                    <article class="value-card">
+                        <div>
+                            <i class="value-icon fa-solid fa-shield-halved" aria-hidden="true"></i>
+                            <h3>Safety and Health</h3>
+                            <ul>
+                                <li>Zero-harm workplace standard for all plant personnel.</li>
+                                <li>Rigorous handling protocols for flammable materials.</li>
+                                <li>Continuous safety training and emergency readiness.</li>
+                            </ul>
+                        </div>
+                    </article>
+
+                    <article class="value-card">
+                        <div>
+                            <i class="value-icon fa-solid fa-certificate" aria-hidden="true"></i>
+                            <h3>Regulatory Compliance</h3>
+                            <ul>
+                                <li>Adhering strictly to pollution control board norms.</li>
+                                <li>Transparent reporting on environmental clearances.</li>
+                                <li>Fulfilling all state and central excise guidelines.</li>
+                            </ul>
+                        </div>
+                    </article>
+
+                    <article class="value-card">
+                        <div>
+                            <i class="value-icon fa-solid fa-gears" aria-hidden="true"></i>
+                            <h3>Operational Excellence</h3>
+                            <ul>
+                                <li>Driving high energy and fermentation efficiency.</li>
+                                <li>Ensuring consistent fuel-grade (99.9%) product quality.</li>
+                            </ul>
+                        </div>
+                    </article>
+                </div>
+            </div>
+        </section>
+
         <section class="careers-directory">
             <div class="container careers-layout">
                 <aside class="careers-sidebar">
@@ -46,7 +629,6 @@
                     <h1>Our Open<br>Roles</h1>
                     <p class="sidebar-intro">Join the team building a cleaner energy future through responsible biofuel production.</p>
                     <nav class="directory-links" aria-label="Career page sections">
-                        <a href="#openings">Search</a>
                         <a href="index.html#leaders">Our People</a>
                         <a href="index.html#contact">Contact</a>
                     </nav>

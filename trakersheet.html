@@ -1,0 +1,2028 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>SBBF Sheet Tracker</title>
+
+    <!-- Google Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+
+        /* =========================================================
+           ROOT
+        ========================================================= */
+
+        :root {
+            --primary: #064b3b;
+            --primary-dark: #033b2f;
+            --primary-light: #0b6b53;
+
+            --green: #15956f;
+            --green-light: #dff5ec;
+
+            --text: #17352d;
+            --muted: #6f817c;
+
+            --border: #e7eeeb;
+            --background: #f7faf9;
+            --white: #ffffff;
+
+            --blue: #3578e5;
+            --purple: #7354d8;
+            --yellow: #e2a824;
+
+            --shadow:
+                0 8px 30px rgba(18, 67, 54, 0.07);
+
+            --shadow-hover:
+                0 14px 35px rgba(18, 67, 54, 0.13);
+
+            --radius: 16px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Inter", sans-serif;
+            background: var(--background);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        button,
+        input {
+            font-family: inherit;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+
+        /* =========================================================
+           TOP NAVIGATION
+        ========================================================= */
+
+        .topbar {
+            height: 82px;
+            background: white;
+            border-bottom: 1px solid var(--border);
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            padding: 0 28px;
+
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            min-width: 300px;
+        }
+
+        .brand-logo {
+            width: 54px;
+            height: 54px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            color: var(--primary);
+        }
+
+        .brand-logo img {
+            width: 48px;
+            height: 48px;
+            object-fit: contain;
+            mix-blend-mode: multiply;
+            filter: saturate(.9) contrast(1.05);
+        }
+
+        .brand-name {
+            font-size: 20px;
+            font-weight: 700;
+            color: #17352d;
+        }
+
+        .brand-subtitle {
+            font-size: 14px;
+            color: #71817c;
+            margin-top: 2px;
+        }
+
+
+        /* SEARCH */
+
+        .search-container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            padding: 0 30px;
+        }
+
+        .search-box {
+            width: min(470px, 100%);
+            height: 42px;
+
+            border: 1px solid #dce8e3;
+            border-radius: 24px;
+
+            display: flex;
+            align-items: center;
+
+            padding: 0 16px;
+            gap: 10px;
+
+            background: #f8fbfa;
+
+            transition: .2s;
+        }
+
+        .search-box:focus-within {
+            border-color: #82b7a7;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(21, 149, 111, .08);
+        }
+
+        .search-box svg {
+            width: 18px;
+            color: #66827a;
+        }
+
+        .search-box input {
+            border: none;
+            outline: none;
+            background: transparent;
+
+            width: 100%;
+
+            font-size: 13px;
+            color: var(--text);
+        }
+
+        .search-box input::placeholder {
+            color: #91a19c;
+        }
+
+
+        /* TOP LINKS */
+
+        .top-links {
+            display: flex;
+            align-items: center;
+            gap: 28px;
+        }
+
+        .top-link {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+
+            gap: 5px;
+
+            font-size: 11px;
+            color: #61746d;
+
+            position: relative;
+            cursor: pointer;
+
+            transition: .2s;
+        }
+
+        .top-link:hover {
+            color: var(--primary);
+        }
+
+        .top-link svg {
+            width: 21px;
+            height: 21px;
+        }
+
+        .top-link.active {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .top-link.active::after {
+            content: "";
+
+            position: absolute;
+
+            bottom: -20px;
+
+            width: 38px;
+            height: 3px;
+
+            background: var(--primary);
+
+            border-radius: 3px;
+        }
+
+        .profile {
+            width: 42px;
+            height: 42px;
+
+            border-left: 1px solid var(--border);
+
+            padding-left: 18px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            color: var(--primary);
+        }
+
+        .profile svg {
+            width: 28px;
+            height: 28px;
+        }
+
+
+        /* =========================================================
+           LAYOUT
+        ========================================================= */
+
+        .layout {
+            display: flex;
+            min-height: calc(100vh - 82px);
+        }
+
+
+        /* =========================================================
+           SIDEBAR
+        ========================================================= */
+
+        .sidebar {
+            width: 232px;
+
+            background:
+                linear-gradient(
+                    180deg,
+                    #063f32 0%,
+                    #032f27 100%
+                );
+
+            color: white;
+
+            padding: 25px 14px;
+
+            position: fixed;
+            left: 0;
+            top: 82px;
+            bottom: 0;
+
+            overflow: hidden;
+        }
+
+        .sidebar::before {
+            content: "";
+
+            position: absolute;
+
+            width: 220px;
+            height: 220px;
+
+            right: -100px;
+            bottom: 30px;
+
+            border-radius: 50%;
+
+            background: rgba(75, 180, 135, .08);
+        }
+
+        .nav-title {
+            color: rgba(255,255,255,.45);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+
+            padding: 10px 14px 8px;
+        }
+
+        .side-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+
+            position: relative;
+            z-index: 2;
+        }
+
+        .side-link {
+            height: 49px;
+
+            display: flex;
+            align-items: center;
+
+            gap: 15px;
+
+            padding: 0 15px;
+
+            border-radius: 9px;
+
+            color: rgba(255,255,255,.72);
+
+            font-size: 13px;
+            font-weight: 500;
+
+            cursor: pointer;
+
+            transition: .2s;
+        }
+
+        .side-link svg {
+            width: 20px;
+            height: 20px;
+            stroke-width: 1.7;
+        }
+
+        .side-link:hover {
+            background: rgba(255,255,255,.07);
+            color: white;
+        }
+
+        .side-link.active {
+            background:
+                linear-gradient(
+                    90deg,
+                    rgba(49,159,121,.45),
+                    rgba(49,159,121,.20)
+                );
+
+            color: white;
+        }
+
+        .side-link.active::before {
+            content: "";
+
+            position: absolute;
+            left: 0;
+
+            width: 3px;
+            height: 28px;
+
+            background: #7dd7b5;
+
+            border-radius: 0 5px 5px 0;
+        }
+
+        .sidebar-bottom {
+            position: absolute;
+            bottom: 25px;
+            left: 25px;
+            right: 25px;
+
+            z-index: 2;
+        }
+
+        .leaf-decoration {
+            width: 110px;
+            height: 110px;
+            margin-bottom: 20px;
+            opacity: .24;
+        }
+
+        .leaf-decoration img {
+            width: 110px;
+            height: 110px;
+            object-fit: contain;
+            mix-blend-mode: multiply;
+        }
+
+        .sidebar-message {
+            font-size: 12px;
+            line-height: 1.6;
+
+            color: rgba(255,255,255,.75);
+        }
+
+        .sidebar-line {
+            margin-top: 10px;
+
+            width: 32px;
+            height: 3px;
+
+            background: #5bc39c;
+            border-radius: 3px;
+        }
+
+
+        /* =========================================================
+           MAIN
+        ========================================================= */
+
+        main {
+            margin-left: 232px;
+            width: calc(100% - 232px);
+
+            padding: 21px;
+        }
+
+
+        /* =========================================================
+           HERO
+        ========================================================= */
+
+        .hero {
+            min-height: 190px;
+
+            border-radius: 16px;
+
+            overflow: hidden;
+
+            position: relative;
+
+            background:
+                linear-gradient(
+                    105deg,
+                    #004734 0%,
+                    #07583f 52%,
+                    #0c684c 100%
+                );
+
+            box-shadow: var(--shadow);
+
+            display: flex;
+            align-items: center;
+        }
+
+        .hero::after {
+            content: "";
+
+            position: absolute;
+
+            right: -80px;
+            top: -100px;
+
+            width: 430px;
+            height: 430px;
+
+            border-radius: 50%;
+
+            border: 70px solid rgba(255,255,255,.035);
+        }
+
+        .hero-content {
+            padding: 30px 45px;
+
+            position: relative;
+            z-index: 3;
+
+            display: flex;
+            align-items: center;
+
+            gap: 28px;
+        }
+
+        .hero-logo {
+            width: 100px;
+            height: 100px;
+
+            border: 1px solid rgba(255,255,255,.12);
+
+            border-radius: 20px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            background: rgba(255,255,255,.04);
+
+            color: #9ddcca;
+        }
+
+        .hero-logo img {
+            width: 70px;
+            height: 70px;
+            object-fit: contain;
+            mix-blend-mode: multiply;
+            filter: saturate(.95) contrast(1.05) brightness(1.18);
+        }
+
+        .hero h1 {
+            font-size: 39px;
+            letter-spacing: 1px;
+            font-weight: 800;
+
+            color: white;
+        }
+
+        .hero-company {
+            margin-top: 7px;
+
+            color: rgba(255,255,255,.78);
+
+            letter-spacing: 4px;
+            font-size: 13px;
+        }
+
+        .hero-tagline {
+            margin-top: 18px;
+
+            color: rgba(255,255,255,.9);
+
+            font-size: 15px;
+        }
+
+        .hero-tagline span {
+            margin: 0 10px;
+            opacity: .5;
+        }
+
+        .hero-right {
+            position: absolute;
+            right: 45px;
+
+            color: white;
+
+            z-index: 3;
+        }
+
+        .hero-right h3 {
+            font-size: 18px;
+            font-weight: 500;
+            font-style: italic;
+
+            line-height: 1.45;
+        }
+
+        .hero-right-line {
+            width: 42px;
+            height: 3px;
+
+            margin-top: 12px;
+
+            background: #9ddcca;
+        }
+
+
+        /* =========================================================
+           CARDS GRID
+        ========================================================= */
+
+        .dashboard-grid {
+            margin-top: 24px;
+
+            display: grid;
+
+            grid-template-columns:
+                repeat(4, minmax(0, 1fr));
+
+            gap: 18px;
+        }
+
+
+        /* =========================================================
+           DEPARTMENT CARD
+        ========================================================= */
+
+        .card {
+            background: white;
+
+            border: 1px solid var(--border);
+
+            border-radius: var(--radius);
+
+            min-height: 254px;
+
+            padding: 20px;
+
+            box-shadow: var(--shadow);
+
+            transition:
+                transform .25s ease,
+                box-shadow .25s ease;
+
+            position: relative;
+
+            overflow: hidden;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .card-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .department {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .department-icon {
+            width: 52px;
+            height: 52px;
+
+            border-radius: 50%;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .department-icon svg {
+            width: 25px;
+            height: 25px;
+        }
+
+        .production .department-icon {
+            background: #dcf4e7;
+            color: #17936b;
+        }
+
+        .purchase .department-icon {
+            background: #e0edff;
+            color: #3578e5;
+        }
+
+        .secondary .department-icon {
+            background: #eee7ff;
+            color: #7354d8;
+        }
+
+        .accounts .department-icon {
+            background: #fff0c9;
+            color: #c38b11;
+        }
+
+        .hr .department-icon {
+            background: #dff8f2;
+            color: #168d7c;
+        }
+
+        .other .department-icon {
+            background: #dff4ec;
+            color: #148b69;
+        }
+
+        .department h2 {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .heading-line {
+            width: 48px;
+            height: 3px;
+
+            margin-top: 8px;
+
+            border-radius: 3px;
+
+            background: currentColor;
+        }
+
+        .production .heading-line {
+            color: #32a77c;
+        }
+
+        .purchase .heading-line {
+            color: #4284e8;
+        }
+
+        .secondary .heading-line {
+            color: #7354d8;
+        }
+
+        .accounts .heading-line {
+            color: #e2ae35;
+        }
+
+        .hr .heading-line {
+            color: #22aa94;
+        }
+
+        .other .heading-line {
+            color: #1aa47c;
+        }
+
+        .arrow-button {
+            width: 36px;
+            height: 36px;
+
+            border-radius: 50%;
+
+            border: none;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            cursor: pointer;
+
+            transition: .2s;
+        }
+
+        .arrow-button:hover {
+            transform: translateX(3px);
+        }
+
+        .arrow-button svg {
+            width: 18px;
+        }
+
+        .production .arrow-button {
+            background: #eff9f4;
+            color: #168c65;
+        }
+
+        .purchase .arrow-button {
+            background: #f0f5ff;
+            color: #3578e5;
+        }
+
+        .secondary .arrow-button {
+            background: #f4f0ff;
+            color: #7354d8;
+        }
+
+        .accounts .arrow-button {
+            background: #fff8e6;
+            color: #bd8a1b;
+        }
+
+        .hr .arrow-button,
+        .other .arrow-button {
+            background: #edf9f5;
+            color: #168c65;
+        }
+
+
+        /* =========================================================
+           DOCUMENT LINKS
+        ========================================================= */
+
+        .documents {
+            margin-top: 18px;
+
+            display: flex;
+            flex-direction: column;
+
+            gap: 12px;
+        }
+
+        .document {
+            display: flex;
+            align-items: center;
+
+            gap: 9px;
+
+            font-size: 12px;
+
+            color: #334e46;
+
+            cursor: pointer;
+
+            transition: .2s;
+        }
+
+        .document:hover {
+            color: var(--primary);
+            transform: translateX(2px);
+        }
+
+        .document svg {
+            width: 15px;
+            height: 15px;
+
+            flex-shrink: 0;
+
+            color: #15956f;
+        }
+
+        .purchase .document svg {
+            color: #3578e5;
+        }
+
+        .secondary .document svg {
+            color: #7354d8;
+        }
+
+        .accounts .document svg {
+            color: #c38b11;
+        }
+
+        .document-text {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .document-arrow {
+            margin-left: auto;
+
+            opacity: 0;
+
+            transition: .2s;
+        }
+
+        .document:hover .document-arrow {
+            opacity: 1;
+        }
+
+
+        /* VIEW ALL */
+
+        .view-all {
+            position: absolute;
+
+            right: 20px;
+            bottom: 18px;
+
+            display: flex;
+            align-items: center;
+
+            gap: 5px;
+
+            font-size: 12px;
+            font-weight: 600;
+
+            color: var(--primary);
+
+            cursor: pointer;
+        }
+
+        .view-all:hover {
+            text-decoration: underline;
+        }
+
+        .purchase .view-all {
+            color: #245fc2;
+        }
+
+        .secondary .view-all {
+            color: #6145bd;
+        }
+
+        .accounts .view-all {
+            color: #b27e0b;
+        }
+
+
+        /* =========================================================
+           FEATURE CARD
+        ========================================================= */
+
+        .feature-card {
+            min-height: 254px;
+
+            grid-column: span 2;
+
+            border-radius: var(--radius);
+
+            overflow: hidden;
+
+            position: relative;
+
+            background: #07533e;
+
+            color: white;
+
+            box-shadow: var(--shadow);
+        }
+
+        .feature-image {
+            position: absolute;
+
+            inset: 0;
+
+            background: url("Picture/Plant%20Photo_3.jpeg") center / cover no-repeat;
+        }
+
+        .feature-overlay {
+            position: absolute;
+
+            inset: 0;
+
+            background:
+                linear-gradient(
+                    90deg,
+                    rgba(0,62,47,.94),
+                    rgba(0,62,47,.68)
+                );
+        }
+
+        .feature-content {
+            position: relative;
+
+            z-index: 2;
+
+            padding: 30px;
+
+            height: 100%;
+
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .feature-content h2 {
+            font-size: 20px;
+            font-weight: 500;
+
+            line-height: 1.5;
+        }
+
+        .feature-line {
+            width: 40px;
+            height: 3px;
+
+            background: #9eddbd;
+
+            margin: 14px 0 20px;
+        }
+
+        .feature-stats {
+            position: absolute;
+
+            bottom: 0;
+            left: 0;
+            right: 0;
+
+            height: 68px;
+
+            background: rgba(0,0,0,.18);
+
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        .feature-stat {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            gap: 8px;
+
+            font-size: 10px;
+
+            border-right: 1px solid rgba(255,255,255,.2);
+        }
+
+        .feature-stat:last-child {
+            border-right: none;
+        }
+
+        .stat-icon {
+            width: 32px;
+            height: 32px;
+
+            border-radius: 50%;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            background: rgba(124,209,158,.2);
+        }
+
+        .stat-icon svg {
+            width: 16px;
+        }
+
+
+        /* =========================================================
+           RESPONSIVE
+        ========================================================= */
+
+        @media(max-width: 1250px) {
+
+            .dashboard-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .hero-right {
+                display: none;
+            }
+
+            .hero h1 {
+                font-size: 32px;
+            }
+
+            .feature-card {
+                grid-column: span 3;
+            }
+
+        }
+
+
+        @media(max-width: 1000px) {
+
+            .sidebar {
+                width: 75px;
+            }
+
+            .side-link span,
+            .nav-title,
+            .sidebar-bottom {
+                display: none;
+            }
+
+            .side-link {
+                justify-content: center;
+                padding: 0;
+            }
+
+            main {
+                margin-left: 75px;
+                width: calc(100% - 75px);
+            }
+
+            .brand {
+                min-width: auto;
+            }
+
+            .brand-name,
+            .brand-subtitle {
+                display: none;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .feature-card {
+                grid-column: span 2;
+            }
+
+        }
+
+
+        @media(max-width: 700px) {
+
+            .topbar {
+                height: 70px;
+                padding: 0 14px;
+            }
+
+            .top-links {
+                gap: 12px;
+            }
+
+            .top-link span {
+                display: none;
+            }
+
+            .search-container {
+                display: none;
+            }
+
+            .sidebar {
+                top: 70px;
+            }
+
+            main {
+                padding: 14px;
+            }
+
+            .hero {
+                min-height: 230px;
+            }
+
+            .hero-content {
+                padding: 25px;
+            }
+
+            .hero-logo {
+                display: none;
+            }
+
+            .hero h1 {
+                font-size: 27px;
+            }
+
+            .hero-company {
+                font-size: 10px;
+                letter-spacing: 2px;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .feature-card {
+                grid-column: span 1;
+            }
+
+            .profile {
+                display: none;
+            }
+
+        }
+
+        @media(prefers-color-scheme: dark) {
+
+            :root {
+                --background: #071b16;
+                --text: #e6f3ee;
+                --muted: #a0b5ad;
+                --border: #1b3b31;
+                --white: #102a23;
+                --shadow: 0 8px 30px rgba(0, 0, 0, .24);
+                --shadow-hover: 0 14px 35px rgba(0, 0, 0, .34);
+            }
+
+            body,
+            .topbar {
+                background: #102a23;
+                color: var(--text);
+            }
+
+            .topbar {
+                border-bottom-color: #1b3b31;
+            }
+
+            .brand-logo img,
+            .hero-logo img,
+            .leaf-decoration img {
+                mix-blend-mode: multiply;
+                filter: brightness(1.65) saturate(.82) contrast(1.08);
+            }
+
+            .brand-name,
+            .brand-subtitle,
+            .document,
+            .department h2 {
+                color: var(--text);
+            }
+
+            .search-box,
+            .card {
+                background: #15352c;
+                border-color: #255044;
+            }
+
+            .search-box input,
+            .search-box svg {
+                color: var(--text);
+            }
+
+            .search-box input::placeholder {
+                color: #86a49a;
+            }
+
+            .top-link {
+                color: #a9c0b7;
+            }
+
+            .top-link:hover,
+            .top-link.active {
+                color: #b8ead6;
+            }
+
+            .document:hover {
+                color: #9de0c3;
+            }
+
+        }
+
+    </style>
+</head>
+
+
+<body>
+
+
+<!-- =========================================================
+     TOP BAR
+========================================================= -->
+
+<header class="topbar">
+
+    <div class="brand">
+
+        <div class="brand-logo">
+            <img src="Picture/3d_logo.png" alt="ShreeBalaji Biosolutions Fuels logo">
+        </div>
+
+        <div>
+            <div class="brand-name">
+                ShreeBalaji
+            </div>
+
+            <div class="brand-subtitle">
+                Biosolutions Fuels LLP
+            </div>
+        </div>
+
+    </div>
+
+
+    <!-- Search -->
+
+    <div class="search-container">
+
+        <div class="search-box">
+
+            <i data-lucide="search"></i>
+
+            <input
+                type="text"
+                id="searchInput"
+                placeholder="Search documents, reports, forms..."
+            >
+
+        </div>
+
+    </div>
+
+
+    <!-- Top Navigation -->
+
+    <div class="top-links">
+
+        <a class="top-link active" href="https://sites.google.com/sbbfuels.com/shreebalajibiosolutionsfuelsll/sbbf" target="_blank" rel="noopener noreferrer">
+            <i data-lucide="home"></i>
+            <span>Home</span>
+        </a>
+
+        <a class="top-link" href="https://sites.google.com/sbbfuels.com/shreebalajibiosolutionsfuelsll/sbbf" target="_blank" rel="noopener noreferrer">
+            <i data-lucide="file-text"></i>
+            <span>SBBF</span>
+        </a>
+
+        <a class="top-link" href="https://sites.google.com/sbbfuels.com/shreebalajibiosolutionsfuelsll/sbbf-forms" target="_blank" rel="noopener noreferrer">
+            <i data-lucide="folder"></i>
+            <span>Forms</span>
+        </a>
+
+        <a class="top-link" href="https://sites.google.com/sbbfuels.com/shreebalajibiosolutionsfuelsll/sbbf" target="_blank" rel="noopener noreferrer">
+            <i data-lucide="archive"></i>
+            <span>Old Sheets</span>
+        </a>
+
+        <div class="profile">
+            <i data-lucide="circle-user-round"></i>
+        </div>
+
+    </div>
+
+</header>
+
+
+
+<div class="layout">
+
+
+<!-- =========================================================
+     SIDEBAR
+========================================================= -->
+
+<aside class="sidebar">
+
+    <div class="nav-title">
+        Navigation
+    </div>
+
+    <nav class="side-nav">
+
+        <a class="side-link active" href="https://sites.google.com/sbbfuels.com/shreebalajibiosolutionsfuelsll/sbbf" target="_blank" rel="noopener noreferrer">
+            <i data-lucide="layout-dashboard"></i>
+            <span>Dashboard</span>
+        </a>
+
+        <a class="side-link" href="https://docs.google.com/spreadsheets/d/1pxmqMH2QU27lsPQ7L9weXX6e3eTXWID6MtbbwW4MCdM/edit?gid=1983011390#gid=1983011390" target="_blank" rel="noopener noreferrer">
+            <i data-lucide="factory"></i>
+            <span>Production</span>
+        </a>
+
+        <a class="side-link" href="https://docs.google.com/spreadsheets/d/1W9KWetWnpdYVzAq4g7YvEaVWV7wZXaYic2BARZOWbEE/edit?gid=669736939#gid=669736939" target="_blank" rel="noopener noreferrer">
+            <i data-lucide="shopping-cart"></i>
+            <span>Purchase</span>
+        </a>
+
+        <a class="side-link" href="https://docs.google.com/spreadsheets/d/1VYRdVzSib9fjCGmAzHvKqk65SQ2gFF_58lRgKYmpx70/edit?gid=0#gid=0" target="_blank" rel="noopener noreferrer">
+            <i data-lucide="clipboard-list"></i>
+            <span>Sec. Purchase</span>
+        </a>
+
+        <a class="side-link" href="https://docs.google.com/spreadsheets/d/1HMUCbGG50RYS_C7DMtN7kQTSxKzWbdmenHUYlC0x0xI/edit?gid=0#gid=0" target="_blank" rel="noopener noreferrer">
+            <i data-lucide="wallet"></i>
+            <span>Accounts</span>
+        </a>
+
+        <a class="side-link" href="https://docs.google.com/spreadsheets/d/1GwQKouqyNXcxGkvXlwP5ygARdwspkO0CuxJ7guTDrhY/edit?gid=0#gid=0" target="_blank" rel="noopener noreferrer">
+            <i data-lucide="users"></i>
+            <span>HR</span>
+        </a>
+
+        <a class="side-link" href="https://docs.google.com/spreadsheets/d/1ctpm0q-AnvU8hreZETVNNasEfwi5Fq-FCKiKzCsfWGM/edit?gid=0#gid=0" target="_blank" rel="noopener noreferrer">
+            <i data-lucide="grid-2x2"></i>
+            <span>Other Sheets</span>
+        </a>
+
+    </nav>
+
+
+    <div class="sidebar-bottom">
+
+        <div class="leaf-decoration">
+            <img src="Picture/3d_logo.png" alt="ShreeBalaji Biosolutions Fuels logo">
+        </div>
+
+        <div class="sidebar-message">
+            Sustainable Fuels<br>
+            for a Greener Tomorrow
+        </div>
+
+        <div class="sidebar-line"></div>
+
+    </div>
+
+</aside>
+
+
+
+<!-- =========================================================
+     MAIN CONTENT
+========================================================= -->
+
+<main>
+
+
+<!-- =========================================================
+     HERO
+========================================================= -->
+
+<section class="hero">
+
+    <div class="hero-content">
+
+        <div class="hero-logo">
+            <img src="Picture/3d_logo.png" alt="ShreeBalaji Biosolutions Fuels logo">
+        </div>
+
+        <div>
+
+            <h1>
+                SBBF SHEET TRACKER
+            </h1>
+
+            <div class="hero-company">
+                SHREEBALAJI BIOSOLUTIONS FUELS LLP
+            </div>
+
+            <div class="hero-tagline">
+                Track
+                <span>|</span>
+                Manage
+                <span>|</span>
+                Grow
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="hero-right">
+
+        <h3>
+            Cleaner Energy<br>
+            A Greener Future
+        </h3>
+
+        <div class="hero-right-line"></div>
+
+    </div>
+
+</section>
+
+
+
+<!-- =========================================================
+     DASHBOARD CARDS
+========================================================= -->
+
+<section class="dashboard-grid" id="dashboardGrid">
+
+
+<!-- =========================================================
+     PRODUCTION
+========================================================= -->
+
+<div class="card production">
+
+    <div class="card-top">
+
+        <div class="department">
+
+            <div class="department-icon">
+                <i data-lucide="factory"></i>
+            </div>
+
+            <div>
+                <h2>PRODUCTION</h2>
+                <div class="heading-line"></div>
+            </div>
+
+        </div>
+
+        <button class="arrow-button">
+            <i data-lucide="arrow-right"></i>
+        </button>
+
+    </div>
+
+
+    <div class="documents">
+
+        <a href="https://docs.google.com/spreadsheets/d/1pxmqMH2QU27lsPQ7L9weXX6e3eTXWID6MtbbwW4MCdM/edit?gid=1983011390#gid=1983011390" class="document" target="_blank" rel="noopener noreferrer">
+            <i data-lucide="file-text"></i>
+            <span class="document-text">
+                DDGS Lab Report
+            </span>
+            <i class="document-arrow" data-lucide="chevron-right"></i>
+        </a>
+
+        <a href="https://docs.google.com/spreadsheets/d/19JPW15JGunaN7AwIkJG0reyJWlVzyV98G2bv9vhA7LM/edit?gid=1378087678#gid=1378087678" class="document" target="_blank" rel="noopener noreferrer">
+            <i data-lucide="file-text"></i>
+            <span class="document-text">
+                WTP Water Consumption Report – June 2026
+            </span>
+            <i class="document-arrow" data-lucide="chevron-right"></i>
+        </a>
+
+        <a href="https://docs.google.com/spreadsheets/d/1bVUPYMqMHA1c46iwneo8cWvVyWnNO4xmFDh8gWXxmLc/edit?gid=115772055#gid=115772055" class="document" target="_blank" rel="noopener noreferrer">
+            <i data-lucide="file-text"></i>
+            <span class="document-text">
+                CPU WATER Jun-2026
+            </span>
+            <i class="document-arrow" data-lucide="chevron-right"></i>
+        </a>
+
+        <a href="https://docs.google.com/spreadsheets/d/1mqKkwnQkWFqimpUAa2pFHlQzD3RNQUwhMGkXtYVvoVQ/edit?gid=2051962721#gid=2051962721" class="document" target="_blank" rel="noopener noreferrer">
+            <i data-lucide="file-text"></i>
+            <span class="document-text">
+                Fermenter-Wise Chemical Consumption-2026
+            </span>
+            <i class="document-arrow" data-lucide="chevron-right"></i>
+        </a>
+
+    </div>
+
+    <div class="view-all">
+        View All
+        <i data-lucide="arrow-right"></i>
+    </div>
+
+</div>
+
+
+
+<!-- =========================================================
+     PURCHASE
+========================================================= -->
+
+<div class="card purchase">
+
+    <div class="card-top">
+
+        <div class="department">
+
+            <div class="department-icon">
+                <i data-lucide="shopping-cart"></i>
+            </div>
+
+            <div>
+                <h2>PURCHASE</h2>
+                <div class="heading-line"></div>
+            </div>
+
+        </div>
+
+        <button class="arrow-button">
+            <i data-lucide="arrow-right"></i>
+        </button>
+
+    </div>
+
+
+    <div class="documents">
+
+        <a href="https://docs.google.com/spreadsheets/d/1W9KWetWnpdYVzAq4g7YvEaVWV7wZXaYic2BARZOWbEE/edit?gid=669736939#gid=669736939" class="document" target="_blank" rel="noopener noreferrer">
+            <i data-lucide="file-text"></i>
+            <span class="document-text">
+                Purchase Planning-2026
+            </span>
+            <i class="document-arrow" data-lucide="chevron-right"></i>
+        </a>
+
+        <a href="https://docs.google.com/spreadsheets/d/1y7X6yx6mgx4fdv_gxUrLS9mbNiGCaV15MMxx54EmhcY/edit?gid=1589635097#gid=1589635097" class="document" target="_blank" rel="noopener noreferrer">
+            <i data-lucide="file-text"></i>
+            <span class="document-text">
+                Jute Bags Reports
+            </span>
+            <i class="document-arrow" data-lucide="chevron-right"></i>
+        </a>
+
+    </div>
+
+    <div class="view-all">
+        View All
+        <i data-lucide="arrow-right"></i>
+    </div>
+
+</div>
+
+
+
+<!-- =========================================================
+     SECONDARY PURCHASE
+========================================================= -->
+
+<div class="card secondary">
+
+    <div class="card-top">
+
+        <div class="department">
+
+            <div class="department-icon">
+                <i data-lucide="clipboard-list"></i>
+            </div>
+
+            <div>
+                <h2>SEC. PURCHASE</h2>
+                <div class="heading-line"></div>
+            </div>
+
+        </div>
+
+        <button class="arrow-button">
+            <i data-lucide="arrow-right"></i>
+        </button>
+
+    </div>
+
+
+    <div class="documents">
+
+        <a href="https://docs.google.com/spreadsheets/d/1VYRdVzSib9fjCGmAzHvKqk65SQ2gFF_58lRgKYmpx70/edit?gid=0#gid=0" class="document" target="_blank" rel="noopener noreferrer">
+            <i data-lucide="file-text"></i>
+            <span class="document-text">
+                Material Tracking Sheet
+            </span>
+            <i class="document-arrow" data-lucide="chevron-right"></i>
+        </a>
+
+        <a href="https://docs.google.com/spreadsheets/d/1puQLBm0INORG19VUIYjRm0XwgPztaojVjK7NFisL7z8/edit?gid=1233667855#gid=1233667855" class="document" target="_blank" rel="noopener noreferrer">
+            <i data-lucide="file-text"></i>
+            <span class="document-text">
+                New Store Purchase Working Sheet
+            </span>
+            <i class="document-arrow" data-lucide="chevron-right"></i>
+        </a>
+
+        <a href="https://docs.google.com/spreadsheets/d/1X7N86lD8xoKvkmS_enMKIsFg7F6-bq1b-ooigIjsZbo/edit?gid=437690285#gid=437690285" class="document" target="_blank" rel="noopener noreferrer">
+            <i data-lucide="file-text"></i>
+            <span class="document-text">
+                HQ Agra - Purchase Team PO Report
+            </span>
+            <i class="document-arrow" data-lucide="chevron-right"></i>
+        </a>
+
+    </div>
+
+    <div class="view-all">
+        View All
+        <i data-lucide="arrow-right"></i>
+    </div>
+
+</div>
+
+
+
+<!-- =========================================================
+     ACCOUNTS
+========================================================= -->
+
+<div class="card accounts">
+
+    <div class="card-top">
+
+        <div class="department">
+
+            <div class="department-icon">
+                <i data-lucide="coins"></i>
+            </div>
+
+            <div>
+                <h2>ACCOUNT</h2>
+                <div class="heading-line"></div>
+            </div>
+
+        </div>
+
+        <button class="arrow-button">
+            <i data-lucide="arrow-right"></i>
+        </button>
+
+    </div>
+
+
+    <div class="documents">
+
+        <a href="https://docs.google.com/spreadsheets/d/1HMUCbGG50RYS_C7DMtN7kQTSxKzWbdmenHUYlC0x0xI/edit?gid=0#gid=0" class="document" target="_blank" rel="noopener noreferrer">
+            <i data-lucide="file-text"></i>
+            <span class="document-text">
+                PETTY CASH EXP
+            </span>
+            <i class="document-arrow" data-lucide="chevron-right"></i>
+        </a>
+
+    </div>
+
+    <div class="view-all">
+        View All
+        <i data-lucide="arrow-right"></i>
+    </div>
+
+</div>
+
+
+
+<!-- =========================================================
+     HR
+========================================================= -->
+
+<div class="card hr">
+
+    <div class="card-top">
+
+        <div class="department">
+
+            <div class="department-icon">
+                <i data-lucide="users"></i>
+            </div>
+
+            <div>
+                <h2>HR</h2>
+                <div class="heading-line"></div>
+            </div>
+
+        </div>
+
+        <button class="arrow-button">
+            <i data-lucide="arrow-right"></i>
+        </button>
+
+    </div>
+
+
+    <div class="documents">
+
+        <a href="https://docs.google.com/spreadsheets/d/1GwQKouqyNXcxGkvXlwP5ygARdwspkO0CuxJ7guTDrhY/edit?gid=0#gid=0" class="document" target="_blank" rel="noopener noreferrer">
+            <i data-lucide="file-text"></i>
+            <span class="document-text">
+                Hiring Tracker
+            </span>
+            <i class="document-arrow" data-lucide="chevron-right"></i>
+        </a>
+
+        <a href="https://docs.google.com/spreadsheets/d/1GCtRTHuuKOhHoAKtol4xu9f_HUHABblcChp4D1BgjL0/edit?gid=1564938451#gid=1564938451" class="document" target="_blank" rel="noopener noreferrer">
+            <i data-lucide="file-text"></i>
+            <span class="document-text">
+                House keeping Sheet
+            </span>
+            <i class="document-arrow" data-lucide="chevron-right"></i>
+        </a>
+
+        <a href="https://docs.google.com/spreadsheets/d/1-qhhSoDtAMqNj1yQZF-QUyNPdh4GfuP6ji4A608npkY/edit?usp=sharing" class="document" target="_blank" rel="noopener noreferrer">
+            <i data-lucide="file-text"></i>
+            <span class="document-text">
+                Plant Shift Schedule Sheet
+            </span>
+            <i class="document-arrow" data-lucide="chevron-right"></i>
+        </a>
+
+        <a href="https://docs.google.com/spreadsheets/d/1s89vAouemFImHuhI5vm5gNje06A4voIp16LLt9-Lwvo/edit?usp=sharing" class="document" target="_blank" rel="noopener noreferrer">
+            <i data-lucide="file-text"></i>
+            <span class="document-text">
+                Employees Retention Ratio Sheet
+            </span>
+            <i class="document-arrow" data-lucide="chevron-right"></i>
+        </a>
+
+    </div>
+
+    <div class="view-all">
+        View All
+        <i data-lucide="arrow-right"></i>
+    </div>
+
+</div>
+
+
+
+<!-- =========================================================
+     OTHER SHEETS
+========================================================= -->
+
+<div class="card other">
+
+    <div class="card-top">
+
+        <div class="department">
+
+            <div class="department-icon">
+                <i data-lucide="files"></i>
+            </div>
+
+            <div>
+                <h2>OTHER SHEETS</h2>
+                <div class="heading-line"></div>
+            </div>
+
+        </div>
+
+        <button class="arrow-button">
+            <i data-lucide="arrow-right"></i>
+        </button>
+
+    </div>
+
+
+    <div class="documents">
+
+        <a href="https://docs.google.com/spreadsheets/d/1ctpm0q-AnvU8hreZETVNNasEfwi5Fq-FCKiKzCsfWGM/edit?gid=0#gid=0" class="document" target="_blank" rel="noopener noreferrer">
+            <i data-lucide="file-text"></i>
+            <span class="document-text">
+                Plant Query Sheet
+            </span>
+            <i class="document-arrow" data-lucide="chevron-right"></i>
+        </a>
+
+        <a href="https://docs.google.com/spreadsheets/d/1KWS1H7B1pF27X-9nq_wMqpYdc8bxcI1XG5-BeM_T7k4/edit?gid=683868582#gid=683868582" class="document" target="_blank" rel="noopener noreferrer">
+            <i data-lucide="file-text"></i>
+            <span class="document-text">
+                Vehicle Maintenance Sheet
+            </span>
+            <i class="document-arrow" data-lucide="chevron-right"></i>
+        </a>
+
+        <a href="https://docs.google.com/spreadsheets/d/1ZUqxX9NvpAxh35xWBdDB-0uc5vThlfsz18JH-TeYvNI/edit?gid=1979364303#gid=1979364303" class="document" target="_blank" rel="noopener noreferrer">
+            <i data-lucide="file-text"></i>
+            <span class="document-text">
+                DPR Sheet
+            </span>
+            <i class="document-arrow" data-lucide="chevron-right"></i>
+        </a>
+
+        <a href="https://docs.google.com/spreadsheets/d/1JWcSzKt4e53gIF-rqp5SEwa7fuRPaG04ZX8b5sExaag/edit?gid=1530857637#gid=1530857637" class="document" target="_blank" rel="noopener noreferrer">
+            <i data-lucide="file-text"></i>
+            <span class="document-text">
+                SBBEL Labour Register - 2026
+            </span>
+            <i class="document-arrow" data-lucide="chevron-right"></i>
+        </a>
+
+    </div>
+
+    <div class="view-all">
+        View All
+        <i data-lucide="arrow-right"></i>
+    </div>
+
+</div>
+
+
+
+<!-- =========================================================
+     FEATURE CARD
+========================================================= -->
+
+<div class="feature-card">
+
+    <div class="feature-image"></div>
+
+    <div class="feature-overlay"></div>
+
+    <div class="feature-content">
+
+        <h2>
+            Efficiency<br>
+            Transparency<br>
+            Sustainability
+        </h2>
+
+        <div class="feature-line"></div>
+
+    </div>
+
+
+    <div class="feature-stats">
+
+        <div class="feature-stat">
+
+            <div class="stat-icon">
+                <i data-lucide="leaf"></i>
+            </div>
+
+            Clean Energy
+
+        </div>
+
+
+        <div class="feature-stat">
+
+            <div class="stat-icon">
+                <i data-lucide="sprout"></i>
+            </div>
+
+            Sustainable Growth
+
+        </div>
+
+
+        <div class="feature-stat">
+
+            <div class="stat-icon">
+                <i data-lucide="globe"></i>
+            </div>
+
+            Better Tomorrow
+
+        </div>
+
+    </div>
+
+</div>
+
+
+</section>
+
+</main>
+
+</div>
+
+
+
+<script>
+
+    /* =========================================================
+       INITIALIZE ICONS
+    ========================================================= */
+
+    lucide.createIcons();
+
+
+    /* =========================================================
+       SEARCH
+    ========================================================= */
+
+    const searchInput =
+        document.getElementById("searchInput");
+
+    const cards =
+        document.querySelectorAll(".card");
+
+
+    searchInput.addEventListener("input", function () {
+
+        const query =
+            this.value.toLowerCase().trim();
+
+        cards.forEach(card => {
+
+            const text =
+                card.innerText.toLowerCase();
+
+            if (!query || text.includes(query)) {
+
+                card.style.display = "";
+
+            } else {
+
+                card.style.display = "none";
+
+            }
+
+        });
+
+    });
+
+
+    /* =========================================================
+       SIDEBAR ACTIVE STATE
+    ========================================================= */
+
+    const sideLinks =
+        document.querySelectorAll(".side-link");
+
+    sideLinks.forEach(link => {
+
+        link.addEventListener("click", function () {
+
+            sideLinks.forEach(item =>
+                item.classList.remove("active")
+            );
+
+            this.classList.add("active");
+
+        });
+
+    });
+
+
+    /* =========================================================
+       TOP NAV ACTIVE STATE
+    ========================================================= */
+
+    const topLinks =
+        document.querySelectorAll(".top-link");
+
+    topLinks.forEach(link => {
+
+        link.addEventListener("click", function () {
+
+            topLinks.forEach(item =>
+                item.classList.remove("active")
+            );
+
+            this.classList.add("active");
+
+        });
+
+    });
+
+
+    /* =========================================================
+       CARD ARROW BUTTONS
+    ========================================================= */
+
+    document
+        .querySelectorAll(".arrow-button")
+        .forEach(button => {
+
+            button.addEventListener("click", function () {
+
+                const card =
+                    this.closest(".card");
+
+                card.scrollIntoView({
+                    behavior: "smooth",
+                    block: "center"
+                });
+
+            });
+
+        });
+
+
+    /* =========================================================
+       VIEW ALL
+    ========================================================= */
+
+    document
+        .querySelectorAll(".view-all")
+        .forEach(button => {
+
+            button.addEventListener("click", function () {
+
+                const card =
+                    this.closest(".card");
+
+                const documents =
+                    card.querySelectorAll(".document");
+
+                documents.forEach(doc => {
+
+                    doc.style.background =
+                        "rgba(20,145,105,.05)";
+
+                });
+
+            });
+
+        });
+
+</script>
+
+</body>
+</html>
