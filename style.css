@@ -1185,6 +1185,36 @@ footer {
         color: #aabdbc;
     }
 
+    .section-title h2,
+    .card__title,
+    .use-card h3,
+    .card__category,
+    .spec-table tr td:first-child,
+    .subsection-title h3,
+    .pillar,
+    .member-card h4,
+    .about-partners h3 {
+        color: #55c8c0;
+    }
+
+    .card__description,
+    .spec-table td,
+    .use-card p,
+    .ethanol-uses .section-title p,
+    .step h4,
+    .step p,
+    .about-text,
+    .about-partners > p,
+    .partner-details p {
+        color: #d6e5e3;
+    }
+
+    .member-card .role,
+    .partner-details h4,
+    .pillar i {
+        color: #55c8c0;
+    }
+
     .primary-product-section::before {
         background: rgba(13, 23, 24, 0.86);
     }
@@ -1198,6 +1228,10 @@ footer {
 
     .step-num {
         background-color: #102021;
+    }
+
+    .step:hover {
+        background-color: #1d3839;
     }
 
     .products,
@@ -1214,6 +1248,10 @@ footer {
 
     .spec-table td {
         border-color: #365354;
+    }
+
+    .use-card {
+        border-bottom-color: #55c8c0;
     }
 
     #by-products::after,
@@ -1242,6 +1280,20 @@ footer {
 
     .member-img-wrapper {
         background-color: #203536;
+    }
+
+    .about-partners,
+    .pillar {
+        background-color: #172d2e;
+    }
+
+    .partner-card-h {
+        background-color: rgba(23, 45, 46, .92);
+        border-color: rgba(93, 203, 195, .3);
+    }
+
+    .partner-card-h:hover {
+        background-color: #203b3b;
     }
 
     .contact-form input,

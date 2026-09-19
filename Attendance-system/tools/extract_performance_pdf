@@ -1,0 +1,322 @@
+#!/usr/bin/env python3
+"""
+Extract a biometric "Performance Report For Month" PDF into JSON / CSV / JS.
+
+    pip install pdfplumber
+    python tools/extract_performance_pdf.py mnperformance_summary.pdf
+
+Writes into data/:
+    attendance-<month>.json          structured, one object per employee, one row per day
+    attendance-<month>-daily.csv     long format, one row per employee per day
+    attendance-<month>-summary.csv   the report's own summary row per employee
+    attendance-jul-2026.js           window.ATTENDANCE_DATA for attendance-payroll-app.html
+
+Pass several PDFs to emit one .js holding every month:
+
+    python tools/extract_performance_pdf.py jul.pdf aug.pdf
+
+Nothing is inferred or rounded. Every value is read at its printed coordinates, and
+each employee is reconciled against the report's own summary row before anything is
+written — a mismatch is a hard failure, not a warning.
+
+Times and durations in these reports are hh.mm, NOT decimal hours: 8.49 is 8h 49m.
+"""
+import csv
+import json
+import os
+import re
+import sys
+
+try:
+    import pdfplumber
+except ImportError:
+    sys.exit("pdfplumber is required:  pip install pdfplumber")
+
+HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+OUTDIR = os.path.join(HERE, "data")
+
+SUMCOLS = ["Present", "WO", "HL", "Absent", "Paid_Lv", "Unpaid_Lv", "Tot. Leave",
+           "Paid_Days", "Night", "LateHrs", "EarlHrs", "Work Hrs", "OvTim"]
+ROWSEQ = ["in", "out", "work", "ot", "status", "break"]   # the fixed print order per employee
+DAYSEQ = [str(i) for i in range(1, 32)]
+MONTHNUM = {"Jan": 1, "Feb": 2, "Mar": 3, "Apr": 4, "May": 5, "Jun": 6,
+            "Jul": 7, "Aug": 8, "Sep": 9, "Oct": 10, "Nov": 11, "Dec": 12}
+
+# The shift window is not a guess: these two values reproduce the report's own
+# LateHrs and EarlHrs columns to the minute. Change them only if a new report
+# fails to reconcile.
+SHIFT_START = 10 * 60
+SHIFT_END = 18 * 60 + 30
+
+
+def hhmm_to_min(s):
+    m = re.fullmatch(r"(\d+)\.(\d{2})", str(s).strip())
+    if not m:
+        raise ValueError("not an hh.mm value: %r" % (s,))
+    return int(m.group(1)) * 60 + int(m.group(2))
+
+
+def min_to_hhmm(t):
+    return "%d.%02d" % (t // 60, t % 60)
+
+
+def lines_of(page, tol=3.0):
+    """Group words into visual lines; a label can sit a point or two off its values."""
+    ws = page.extract_words()
+    ws.sort(key=lambda w: (w["top"], w["x0"]))
+    out, cur = [], None
+    for w in ws:
+        if cur is None or w["top"] - cur["top"] > tol:
+            cur = {"top": w["top"], "ws": [w]}
+            out.append(cur)
+        else:
+            cur["ws"].append(w)
+    for l in out:
+        l["ws"].sort(key=lambda w: w["x0"])
+    return out
+
+
+def mid(w):
+    return (w["x0"] + w["x1"]) / 2.0
+
+
+def parse(path):
+    meta = {"source": os.path.basename(path)}
+    sum_x, dept = {}, {"id": None, "name": None}
+    employees = []
+
+    with pdfplumber.open(path) as pdf:
+        pages = [lines_of(p) for p in pdf.pages]
+
+        # ---- pass 1: the header row gives every column its x anchor
+        for plines in pages:
+            for l in plines:
+                toks = [w["text"] for w in l["ws"]]
+                text = " ".join(toks)
+                if "Performance Report For Month" in text and "month" not in meta:
+                    meta["month"] = text.split("Month")[1].split("Page")[0].strip()
+                if "LLP" in text and "company" not in meta:
+                    meta["company"] = text.split("Page")[0].strip()
+                if "DeptId" in toks:
+                    nums = [t for t in toks if re.fullmatch(r"\d+", t)]
+                    if nums:
+                        dept["id"] = nums[0]
+                    if "Department" in toks:
+                        j = toks.index("Department")
+                        rest = toks[j + 2:] if len(toks) > j + 1 and toks[j + 1] == ":" else toks[j + 1:]
+                        dept["name"] = " ".join(rest)
+                if "EmpCode" in toks and "Present" in toks and not sum_x:
+                    i = 0
+                    while i < len(l["ws"]):
+                        for col in SUMCOLS + ["Card No.", "EmpCode", "Name"]:
+                            parts = col.split()
+                            if toks[i:i + len(parts)] == parts:
+                                sum_x[col] = l["ws"][i]["x0"]
+                                i += len(parts) - 1
+                                break
+                        i += 1
+
+        missing = [c for c in SUMCOLS if c not in sum_x]
+        if missing:
+            raise SystemExit("header columns not found in %s: %s" % (path, missing))
+
+        def nearest_sumcol(w):
+            best, bd = None, 1e9
+            for c in SUMCOLS:
+                d = abs(w["x0"] - sum_x[c])
+                if d < bd:
+                    best, bd = c, d
+            return best if bd <= 22 else None
+
+        ndays = 31
+        if meta.get("month"):
+            mon, yr = meta["month"].split("-")
+            import calendar
+            ndays = calendar.monthrange(int(yr), MONTHNUM[mon])[1]
+
+        # ---- pass 2: employee blocks
+        cur, day_cols, pending = None, None, []
+
+        def flush():
+            nonlocal cur, day_cols, pending
+            if cur is None:
+                return
+            if len(pending) != 6:
+                raise SystemExit("%s: expected 6 data rows, got %d" % (cur["name"], len(pending)))
+            grid = dict(zip(ROWSEQ, pending))
+            cur["days"] = [{
+                "day": i + 1,
+                "in": grid["in"][i], "out": grid["out"][i],
+                "work": grid["work"][i], "ot": grid["ot"][i],
+                "status": grid["status"][i], "break": grid["break"][i],
+            } for i in range(ndays)]
+            employees.append(cur)
+            cur, day_cols, pending = None, None, []
+
+        for pno, plines in enumerate(pages, start=1):
+            for l in plines:
+                ws = l["ws"]
+                toks = [w["text"] for w in ws]
+                if "EmpCode" in toks:
+                    continue
+
+                codes = [w for w in ws if re.fullmatch(r"\d{8}", w["text"])]
+                if codes and any(re.fullmatch(r"\d+\.\d\d", t) for t in toks):
+                    flush()
+                    card = codes[0]
+                    empcode, name, summary = None, [], {}
+                    for w in ws:
+                        if w is card:
+                            continue
+                        t = w["text"]
+                        if w["x0"] < sum_x["Card No."] - 5:
+                            if w["x0"] < sum_x["Name"] - 5 and re.fullmatch(r"\d+", t):
+                                empcode = t
+                            else:
+                                name.append(t)
+                        elif re.fullmatch(r"\d+\.\d\d", t):
+                            c = nearest_sumcol(w)
+                            if not c:
+                                raise SystemExit("unmapped summary value %r at x=%s" % (t, w["x0"]))
+                            if c in summary:
+                                raise SystemExit("two values landed in column %s" % c)
+                            summary[c] = t
+                    cur = {"emp_code": empcode, "card_no": card["text"], "name": " ".join(name),
+                           "dept_id": dept["id"], "dept": dept["name"],
+                           "pdf_summary": summary, "pdf_page": pno}
+                    day_cols, pending = None, []
+                    continue
+
+                if toks == DAYSEQ[:ndays]:
+                    day_cols = [mid(w) for w in ws]
+                    continue
+
+                if cur is None or day_cols is None:
+                    continue
+
+                vals = [w for w in ws if w["x0"] > 55]
+                if len(vals) < ndays - 6:
+                    continue
+                slots = [None] * ndays
+                for w in vals:
+                    c = mid(w)
+                    k = min(range(ndays), key=lambda i: abs(day_cols[i] - c))
+                    if abs(day_cols[k] - c) > 12:
+                        raise SystemExit("day column ambiguous for %r at x=%s" % (w["text"], c))
+                    if slots[k] is not None:
+                        raise SystemExit("two values for day %d (%r)" % (k + 1, w["text"]))
+                    slots[k] = w["text"]
+                if any(s is None for s in slots):
+                    raise SystemExit("gap in a day row for %s: %s" % (cur["name"], slots))
+                pending.append(slots)
+        flush()
+
+    doc = {"source": meta["source"], "month": meta.get("month"),
+           "company": meta.get("company"), "dept_id": dept["id"], "dept": dept["name"],
+           "days_in_month": ndays, "shift_start": min_to_hhmm(SHIFT_START),
+           "shift_end": min_to_hhmm(SHIFT_END), "employees": employees}
+    return doc
+
+
+def reconcile(doc):
+    """Re-add the daily values and compare with the report's own printed summary."""
+    problems = []
+    for e in doc["employees"]:
+        s = e["pdf_summary"]
+        st = [d["status"] for d in e["days"]]
+        pdf_n = lambda k: int(float(s[k])) if k in s else 0
+        pdf_m = lambda k: hhmm_to_min(s[k]) if k in s else 0
+        checks = [
+            ("Present", st.count("P"), pdf_n("Present")),
+            ("WO", st.count("WO"), pdf_n("WO")),
+            ("HL", st.count("HL"), pdf_n("HL")),
+            ("Absent", st.count("A"), pdf_n("Absent")),
+            ("Work Hrs", sum(hhmm_to_min(d["work"]) for d in e["days"]), pdf_m("Work Hrs")),
+            ("OvTim", sum(hhmm_to_min(d["ot"]) for d in e["days"]), pdf_m("OvTim")),
+            ("LateHrs",
+             sum(max(0, hhmm_to_min(d["in"]) - SHIFT_START) for d in e["days"] if hhmm_to_min(d["in"]) > 0),
+             pdf_m("LateHrs")),
+            ("EarlHrs",
+             sum(max(0, SHIFT_END - hhmm_to_min(d["out"])) for d in e["days"] if hhmm_to_min(d["out"]) > 0),
+             pdf_m("EarlHrs")),
+        ]
+        for label, got, want in checks:
+            if got != want:
+                problems.append("%s %-18s %-9s computed=%-8s report=%-8s" % (
+                    e["emp_code"], e["name"], label,
+                    got if label in ("Present", "WO", "HL", "Absent") else min_to_hhmm(got),
+                    want if label in ("Present", "WO", "HL", "Absent") else min_to_hhmm(want)))
+    return problems
+
+
+def write_month_files(doc):
+    os.makedirs(OUTDIR, exist_ok=True)
+    slug = "attendance-" + (doc["month"] or "unknown").lower()
+
+    with open(os.path.join(OUTDIR, slug + ".json"), "w", encoding="utf-8") as f:
+        json.dump(doc, f, indent=1)
+
+    with open(os.path.join(OUTDIR, slug + "-daily.csv"), "w", newline="", encoding="utf-8") as f:
+        w = csv.writer(f)
+        w.writerow(["emp_code", "card_no", "name", "dept", "date", "day", "dow",
+                    "arrival", "departure", "working_hrs", "overtime_hrs", "status",
+                    "break_hrs", "working_mins", "late_mins", "early_mins"])
+        mon, yr = doc["month"].split("-")
+        import datetime
+        for e in doc["employees"]:
+            for d in e["days"]:
+                dt = datetime.date(int(yr), MONTHNUM[mon], d["day"])
+                i, o = hhmm_to_min(d["in"]), hhmm_to_min(d["out"])
+                w.writerow([e["emp_code"], e["card_no"], e["name"], e["dept"],
+                            dt.isoformat(), d["day"], dt.strftime("%a"),
+                            d["in"], d["out"], d["work"], d["ot"], d["status"], d["break"],
+                            hhmm_to_min(d["work"]),
+                            max(0, i - SHIFT_START) if i else 0,
+                            max(0, SHIFT_END - o) if o else 0])
+
+    with open(os.path.join(OUTDIR, slug + "-summary.csv"), "w", newline="", encoding="utf-8") as f:
+        w = csv.writer(f)
+        w.writerow(["emp_code", "card_no", "name", "dept"] + SUMCOLS)
+        for e in doc["employees"]:
+            w.writerow([e["emp_code"], e["card_no"], e["name"], e["dept"]] +
+                       [e["pdf_summary"].get(c, "") for c in SUMCOLS])
+    return slug
+
+
+def main(paths):
+    docs = []
+    for p in paths:
+        doc = parse(p)
+        problems = reconcile(doc)
+        print("%s — %s, %d employees × %d days" % (
+            doc["source"], doc["month"], len(doc["employees"]), doc["days_in_month"]))
+        if problems:
+            print("  RECONCILIATION FAILED:")
+            for line in problems:
+                print("   ", line)
+            sys.exit(1)
+        print("  reconciled: Present / WO / HL / Absent / Work Hrs / OvTim / LateHrs / EarlHrs "
+              "all match the report's own summary row, to the minute.")
+        slug = write_month_files(doc)
+        print("  wrote data/%s.json, -daily.csv, -summary.csv" % slug)
+        docs.append(doc)
+
+    payload = docs[0] if len(docs) == 1 else {"months": docs}
+    js = os.path.join(OUTDIR, "attendance-jul-2026.js")
+    with open(js, "w", encoding="utf-8") as f:
+        f.write("/* Generated by tools/extract_performance_pdf.py — do not edit by hand.\n"
+                "   Source: %s\n"
+                "   Loaded by attendance-payroll-app.html via <script src>, so the app works\n"
+                "   straight off the filesystem (fetch() of a .json would be blocked over file://).\n"
+                "   Times and durations are hh.mm as printed: 8.49 means 8h 49m. */\n"
+                % ", ".join(d["source"] for d in docs))
+        f.write("window.ATTENDANCE_DATA = ")
+        json.dump(payload, f, separators=(",", ":"), ensure_ascii=False)
+        f.write(";\n")
+    print("  wrote data/attendance-jul-2026.js (%.0f KB) — the file the app loads"
+          % (os.path.getsize(js) / 1024.0))
+
+
+if __name__ == "__main__":
+    args = sys.argv[1:] or [os.path.join(HERE, "mnperformance_summary.pdf")]
+    main(args)
