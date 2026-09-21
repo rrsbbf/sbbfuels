@@ -1,6 +1,6 @@
-<Files "trakersheet.html">
+<FilesMatch "(?i)^trakersheet\.html$">
     AuthType Basic
     AuthName "Restricted Area"
-    AuthUserFile D:/sbbfuels-private/.htpasswd
+    AuthUserFile /home/CPANEL_USERNAME/.htpasswd
     Require valid-user
-</Files>
+</FilesMatch>
