@@ -27,7 +27,7 @@ Open in your browser at `http://localhost:3000` (do not open `index.html` via `f
 
 ## Admin alerts — live dashboard (works immediately, no setup)
 
-Set `ADMIN_USER` and `ADMIN_PASSWORD` in `.env` first, then open `http://localhost:3000/admin.html` in a browser tab. The browser will show its standard sign-in prompt.
+Open `http://localhost:3000/admin.html` in a browser tab (keep it open on your desk / office screen).
 The moment someone submits the contact form:
 
 - A toast popup appears saying "New enquiry from **\<name\>**"
@@ -35,13 +35,7 @@ The moment someone submits the contact form:
 - A browser notification pops up (if you allow notifications when prompted)
 - The submission is added instantly to the on-page table, and stays there (backed by `data/submissions.xlsx`)
 
-The dashboard uses a live connection (Server-Sent Events), but it always requires the configured admin credentials. Email/SMTP is optional.
-
-## Browser and source-code security
-
-HTML, CSS, client-side JavaScript, and images must be sent to a browser to render the public site, so they cannot be made genuinely invisible to a visitor. Browser developer tools and JavaScript disabling also cannot be reliably disabled by a website.
-
-The server does protect the actual sensitive boundary: admin APIs and downloads require authentication, and backend source, environment files, package metadata, and stored submissions are not served as public static files. Keep API keys, database credentials, and SMTP credentials in server environment variables only.
+This needs no email/SMTP configuration — it works out of the box over a live connection (Server-Sent Events).
 
 ## Admin email notifications (optional, in addition to the dashboard)
 
@@ -56,8 +50,6 @@ To enable admin email alerts when a contact form is submitted, set the environme
 Example (PowerShell):
 
 ```powershell
-$env:ADMIN_USER="admin"
-$env:ADMIN_PASSWORD="use-a-long-random-password"
 $env:ADMIN_EMAIL="you@example.com"
 $env:SMTP_HOST="smtp.example.com"
 $env:SMTP_PORT="587"

@@ -3,7 +3,6 @@ const fs = require('fs');
 const path = require('path');
 const XLSX = require('xlsx-js-style');
 const nodemailer = require('nodemailer');
-const crypto = require('crypto');
 const projectRoot = path.resolve(__dirname, '..');
 try { require('dotenv').config({ path: path.join(projectRoot, '.env') }); } catch (e) { /* dotenv not installed — env vars can still be set manually */ }
 const app = express();
@@ -13,76 +12,7 @@ const submissionsFile = path.join(dataDir, 'submissions.csv');
 const excelFile = path.join(dataDir, 'submissions.xlsx');
 
 app.use(express.urlencoded({ extended: false }));
-
-// Keep private server files and stored submissions outside the public URL space.
-app.use((req, res, next) => {
-  const pathname = decodeURIComponent(req.path).replace(/\\/g, '/');
-  const blocked = pathname === '/package.json'
-    || pathname === '/README.md'
-    || pathname === '/.env'
-    || pathname.startsWith('/backend/')
-    || pathname.startsWith('/data/');
-
-  if (blocked) return res.sendStatus(404);
-  next();
-});
-
-function requireAdminAuth(req, res, next) {
-  const username = process.env.ADMIN_USER;
-  const password = process.env.ADMIN_PASSWORD;
-  const authorization = req.get('authorization') || '';
-
-  if (!username || !password) {
-    return res.status(503).send('Admin access is not configured. Set ADMIN_USER and ADMIN_PASSWORD on the server.');
-  }
-
-  if (!authorization.startsWith('Basic ')) {
-    res.set('WWW-Authenticate', 'Basic realm="SBBFuels Admin"');
-    return res.sendStatus(401);
-  }
-
-  let suppliedUsername;
-  let suppliedPassword;
-  try {
-    const decoded = Buffer.from(authorization.slice(6), 'base64').toString('utf8');
-    const separator = decoded.indexOf(':');
-    suppliedUsername = separator >= 0 ? decoded.slice(0, separator) : '';
-    suppliedPassword = separator >= 0 ? decoded.slice(separator + 1) : '';
-  } catch {
-    return res.sendStatus(401);
-  }
-
-  const matches = (left, right) => {
-    const leftBuffer = Buffer.from(left);
-    const rightBuffer = Buffer.from(right);
-    return leftBuffer.length === rightBuffer.length
-      && crypto.timingSafeEqual(leftBuffer, rightBuffer);
-  };
-
-  if (!matches(suppliedUsername, username) || !matches(suppliedPassword, password)) {
-    res.set('WWW-Authenticate', 'Basic realm="SBBFuels Admin"');
-    return res.sendStatus(401);
-  }
-
-  next();
-}
-
-app.get('/admin.html', requireAdminAuth, (req, res) => {
-  res.sendFile(path.join(projectRoot, 'admin.html'));
-});
-app.use('/admin', requireAdminAuth);
-
-app.use((req, res, next) => {
-  res.set({
-    'X-Content-Type-Options': 'nosniff',
-    'X-Frame-Options': 'DENY',
-    'Referrer-Policy': 'strict-origin-when-cross-origin',
-    'Permissions-Policy': 'camera=(), microphone=(), geolocation=()'
-  });
-  next();
-});
-
-app.use(express.static(projectRoot, { dotfiles: 'deny', index: false }));
+app.use(express.static(projectRoot));
 
 function readSubmissions() {
   const sourceFile = fs.existsSync(excelFile) ? excelFile : submissionsFile;
@@ -211,7 +141,7 @@ app.post('/submit-contact', (req, res) => {
     const subject = clean(req.body.subject);
     const message = clean(req.body.message);
     const submission = {
-      id: crypto.randomUUID(), timestamp, name, email, subject, message,
+      id: require('crypto').randomUUID(), timestamp, name, email, subject, message,
       status: 'Active', deletedAt: ''
     };
     const data = readSubmissions();
