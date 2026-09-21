@@ -81,6 +81,8 @@ header {
 }
 .logo h2 {
     margin: 0;
+    min-width: 0;
+    overflow-wrap: anywhere;
     display: flex;
     flex-direction: column;
     align-items: flex-start;   /* fixed: was "center", which centered the two lines on top of
@@ -93,6 +95,7 @@ header {
 .company-name-main {
     color: #0d3b34;
     font-size: 1.75rem;
+    max-width: 100%;
     letter-spacing: 1.2px;
     font-weight: 900;
     line-height: 1;
@@ -1336,7 +1339,7 @@ footer {
 }
 
 /* Responsive Breakpoints */
-@media (max-width: 1500px) {
+@media (max-width: 1600px) {
     .navbar {
         flex-direction: column;
         gap: 12px;

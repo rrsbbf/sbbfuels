@@ -12,6 +12,15 @@ const submissionsFile = path.join(dataDir, 'submissions.csv');
 const excelFile = path.join(dataDir, 'submissions.xlsx');
 
 app.use(express.urlencoded({ extended: false }));
+
+app.get('/atsheet.html', (req, res) => {
+  res.sendFile(path.join(projectRoot, 'Attendance-system', 'atsheet.html'));
+});
+
+app.get('/Attendencesheet.html', (req, res) => {
+  res.redirect(301, '/atsheet.html');
+});
+
 app.use(express.static(projectRoot));
 
 function readSubmissions() {
