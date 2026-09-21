@@ -1,6 +1,0 @@
-<FilesMatch "(?i)^trakersheet\.html$">
-    AuthType Basic
-    AuthName "Restricted Area"
-    AuthUserFile /home/CPANEL_USERNAME/.htpasswd
-    Require valid-user
-</FilesMatch>
