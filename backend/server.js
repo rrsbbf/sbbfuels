@@ -3,6 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const XLSX = require('xlsx-js-style');
 const nodemailer = require('nodemailer');
+const crypto = require('crypto');
 const projectRoot = path.resolve(__dirname, '..');
 try { require('dotenv').config({ path: path.join(projectRoot, '.env') }); } catch (e) { /* dotenv not installed — env vars can still be set manually */ }
 const app = express();
@@ -12,6 +13,38 @@ const submissionsFile = path.join(dataDir, 'submissions.csv');
 const excelFile = path.join(dataDir, 'submissions.xlsx');
 
 app.use(express.urlencoded({ extended: false }));
+
+function requireTrackerAuth(req, res, next) {
+  if (req.path.toLowerCase() !== '/trakersheet.html') return next();
+
+  const username = process.env.TRACKER_USERNAME;
+  const password = process.env.TRACKER_PASSWORD;
+  const authorization = req.get('authorization') || '';
+  if (!username || !password || !authorization.startsWith('Basic ')) {
+    res.set('WWW-Authenticate', 'Basic realm="Restricted Area"');
+    return res.sendStatus(401);
+  }
+
+  const decoded = Buffer.from(authorization.slice(6), 'base64').toString('utf8');
+  const separator = decoded.indexOf(':');
+  const suppliedUsername = separator >= 0 ? decoded.slice(0, separator) : '';
+  const suppliedPassword = separator >= 0 ? decoded.slice(separator + 1) : '';
+  const matches = (left, right) => {
+    const leftBuffer = Buffer.from(left);
+    const rightBuffer = Buffer.from(right);
+    return leftBuffer.length === rightBuffer.length
+      && crypto.timingSafeEqual(leftBuffer, rightBuffer);
+  };
+
+  if (!matches(suppliedUsername, username) || !matches(suppliedPassword, password)) {
+    res.set('WWW-Authenticate', 'Basic realm="Restricted Area"');
+    return res.sendStatus(401);
+  }
+
+  next();
+}
+
+app.use(requireTrackerAuth);
 app.use(express.static(projectRoot));
 
 function readSubmissions() {

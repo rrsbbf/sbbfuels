@@ -1,0 +1,6 @@
+<Files "trakersheet.html">
+    AuthType Basic
+    AuthName "Restricted Area"
+    AuthUserFile D:/sbbfuels-private/.htpasswd
+    Require valid-user
+</Files>
