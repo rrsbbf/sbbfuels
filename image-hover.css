@@ -1,0 +1,10 @@
+.cursor-follow-image {
+    translate: var(--cursor-follow-x, 0px) var(--cursor-follow-y, 0px);
+    transition: translate 800ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .cursor-follow-image {
+        transition-duration: 0.01ms;
+    }
+}
