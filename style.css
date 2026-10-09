@@ -1053,8 +1053,9 @@ section { padding: 90px 0; }
 .contact { background-color: var(--white); }
 .contact-wrapper {
     display: grid;
-    grid-template-columns: 0.8fr 1.2fr;
-    gap: 40px;
+    grid-template-columns: 270px minmax(280px, 0.85fr) minmax(380px, 1.2fr);
+    gap: 24px;
+    align-items: start;
 }
 
 .contact-info .info-item {
@@ -1076,6 +1077,26 @@ section { padding: 90px 0; }
 
 .contact-info a:hover {
     color: var(--secondary-color);
+}
+
+.contact-info .location-address {
+    display: block;
+}
+
+.contact-map {
+    width: 270px;
+    max-width: 100%;
+    height: 260px;
+    overflow: hidden;
+    border-radius: 6px;
+    background-color: var(--light-bg);
+}
+
+.contact-map iframe {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border: 0;
 }
 
 .contact-form {
@@ -1361,7 +1382,7 @@ footer {
 }
 
 @media (max-width: 1250px) {
-    .products-grid, .fuel-ethanol-banner, .contact-wrapper {
+    .products-grid, .fuel-ethanol-banner {
         grid-template-columns: 1fr;
     }
     .navbar {
@@ -1384,6 +1405,12 @@ footer {
     }
 
     nav ul li a { font-size: 0.75rem; padding: 6px 5px; }
+}
+
+@media (max-width: 1050px) {
+    .contact-wrapper {
+        grid-template-columns: 1fr;
+    }
 }
 
 @media (max-width: 768px) {
